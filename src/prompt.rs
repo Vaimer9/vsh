@@ -25,7 +25,7 @@ impl InternalCommand {
                 None => String::from("") 
         };
         Self {
-             keyword: keyword,
+             keyword,
              args: splitted.map(ToString::to_string).collect::<Vec<String>>()
         }
     }
@@ -67,7 +67,7 @@ pub fn start_shell() -> std::io::Result<()> {
                 std::process::exit(0);
             }
 
-            ("", _) => println!("\n"),
+            ("", _) => println!(),
 
             (x, y) => {
                 match Command::new(x).args(y).spawn() {
