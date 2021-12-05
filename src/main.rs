@@ -1,5 +1,5 @@
-mod utils;
+mod prompt;
 
 fn main() {
-    utils::prompt::start_shell().unwrap();
+    prompt::start_shell().unwrap();
 }
