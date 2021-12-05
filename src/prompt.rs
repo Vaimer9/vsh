@@ -20,8 +20,12 @@ impl InternalCommand {
     pub fn new(input: String) -> Self {
 
         let mut splitted = input.trim().split_whitespace();
+        let keyword = match splitted.next() {
+                Some(x) => x.to_string(),
+                None => String::from("") 
+        };
         Self {
-             keyword: splitted.next().unwrap().to_string(),
+             keyword: keyword,
              args: splitted.map(ToString::to_string).collect::<Vec<String>>()
         }
     }
@@ -46,16 +50,25 @@ pub fn start_shell() -> std::io::Result<()> {
 
         match (command.keyword.as_str(), command.args) {
             ("cd", x) =>{
-                let target = x.iter().next().unwrap();
-                let path = Path::new(target);
-                match env::set_current_dir(path) {
-                    Ok(_) => (),
-                    Err(_) => println!("No such directory")
+                match x.iter().next() {
+                    Some(e) => {
+                        let path = Path::new(e);
+                        match env::set_current_dir(path) {
+                            Ok(_) => (),
+                            Err(_) => println!("No such directory")
+                        }
+                    }
+                    None => eprintln!("Please specify a directory")
                 }
-            } 
-            ("exit", x) => {
+                
+            }
+
+            ("exit", _) => {
                 std::process::exit(0);
             }
+
+            ("", _) => println!("\n"),
+
             (x, y) => {
                 match Command::new(x).args(y).spawn() {
                     Ok(mut ok) => {
