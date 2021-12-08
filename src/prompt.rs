@@ -1,14 +1,16 @@
 use std::env;
 use std::env::args;
 use std::io::{stdin, stdout, Result, Write};
+use std::path::{PathBuf, Path};
+use std::fs::File;
+use std::fs;
+use std::io;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 use ansi_term::{Colour, Style};
-
-mod eval;
-
-pub const shell_prompt: char = 'λ';
+use directories::ProjectDirs;
+use crate::eval::Internalcommand;
 
 pub struct Prompt {
     character: char,
@@ -16,33 +18,33 @@ pub struct Prompt {
 }
 
 impl Prompt {
-
     pub fn new(character: char) -> Self {
-        Self { character, is_init: false}
+        Self { character, is_init: false }
     }
 
-    pub fn start_shell() -> io::Result<()> {
+    pub fn start_shell(&mut self) -> io::Result<()> {
         let mut rl = Editor::<()>::new();
 
-        if !self.is_init { self.init()? } else {
-            if rl.load_history("history.txt").is_err() {
-                eprintln!("No previous history.");
-            }
-        }
+        //if !self.is_init { self.init()?; } else {
+        //    if rl.load_history(&get_history_dir()).is_err() {
+        //        eprintln!("No previous history.");
+        //    }
+        //}
 
         loop {
             let current_dir = std::env::current_dir()
                 .unwrap()
                 .into_os_string()
-                .into_string()?;
+                .into_string()
+                .unwrap();
 
             println!("{}", Colour::Red.bold().paint(current_dir));
-            let readline = rl.readline(" {} ", self.charecter);
+            let readline = rl.readline(format!("{} ", self.character).as_str());
             
             match readline {
                 Ok(x) => {
-                    rl.add_history_entry(line.as_str());
-                    eval::Internalcommand::new(x).eval()?;
+                    rl.add_history_entry(x.as_str());
+                    Internalcommand::new(x).eval()?;
                 },
                 Err(ReadlineError::Interrupted) => break, 
                 Err(ReadlineError::Eof) => break,
@@ -51,9 +53,9 @@ impl Prompt {
                     break
                 }
             }
-            rl.save_history("history.txt")?;
-
+            // rl.save_history(&get_history_dir()).unwrap();
         }
+        Ok(())
     }
 
     pub fn init(&mut self) -> io::Result<()> {
@@ -72,4 +74,12 @@ impl Prompt {
         self.start_shell()?;
         Ok(())
     }
+}
+
+pub fn get_history_dir() -> PathBuf {
+    let mut p = PathBuf::new();
+    if let Some(x) = ProjectDirs::from("vsh", "vsh", "vsh") {
+        p = x.config_dir().join("history.txt");
+    }
+    p
 }
