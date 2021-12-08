@@ -1,83 +1,75 @@
 use std::env;
 use std::env::args;
 use std::io::{stdin, stdout, Result, Write};
-use std::path::Path;
-use std::process::Command;
-use std::string::ToString;
 
-
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
 use ansi_term::{Colour, Style};
+
+mod eval;
 
 pub const shell_prompt: char = 'λ';
 
-pub struct InternalCommand {
-    keyword: String,
-    args: Vec<String>
+pub struct Prompt {
+    character: char,
+    is_init: bool
 }
 
+impl Prompt {
 
-impl InternalCommand {
-    pub fn new(input: String) -> Self {
+    pub fn new(character: char) -> Self {
+        Self { character, is_init: false}
+    }
 
-        let mut splitted = input.trim().split_whitespace();
-        let keyword = match splitted.next() {
-                Some(x) => x.to_string(),
-                None => String::from("") 
-        };
-        Self {
-             keyword,
-             args: splitted.map(ToString::to_string).collect::<Vec<String>>()
+    pub fn start_shell() -> io::Result<()> {
+        let mut rl = Editor::<()>::new();
+
+        if !self.is_init { self.init()? } else {
+            if rl.load_history("history.txt").is_err() {
+                eprintln!("No previous history.");
+            }
+        }
+
+        loop {
+            let current_dir = std::env::current_dir()
+                .unwrap()
+                .into_os_string()
+                .into_string()?;
+
+            println!("{}", Colour::Red.bold().paint(current_dir));
+            let readline = rl.readline(" {} ", self.charecter);
+            
+            match readline {
+                Ok(x) => {
+                    rl.add_history_entry(line.as_str());
+                    eval::Internalcommand::new(x).eval()?;
+                },
+                Err(ReadlineError::Interrupted) => break, 
+                Err(ReadlineError::Eof) => break,
+                Err(err) => {
+                    println!("Error: {:?}", err);
+                    break
+                }
+            }
+            rl.save_history("history.txt")?;
+
         }
     }
-}
 
-pub fn start_shell() -> std::io::Result<()> {
-    loop {
-        let current_dir = std::env::current_dir()
-            .unwrap()
-            .into_os_string()
-            .into_string()
-            .unwrap();
-
-
-        println!("| {}", Colour::Red.bold().paint(current_dir));
-        print!("|-{} ", shell_prompt);
-        stdout().flush();
-
-        let mut input = String::new();
-        stdin().read_line(&mut input).unwrap();
-        let command = InternalCommand::new(input);
-
-        match (command.keyword.as_str(), command.args) {
-            ("cd", x) =>{
-                match x.iter().next() {
-                    Some(e) => {
-                        let path = Path::new(e);
-                        match env::set_current_dir(path) {
-                            Ok(_) => (),
-                            Err(_) => println!("No such directory")
-                        }
-                    }
-                    None => eprintln!("Please specify a directory")
+    pub fn init(&mut self) -> io::Result<()> {
+        if let Some(x) = ProjectDirs::from("vsh", "vsh", "vsh") {
+            match Path::new(x.config_dir()).is_dir() {
+                true => {
+                    fs::create_dir_all(x.config_dir())?;
+                    let mut file = File::create(x.config_dir().join("history.txt"))?;
                 }
-                
-            }
-
-            ("exit", _) => {
-                std::process::exit(0);
-            }
-
-            ("", _) => println!(),
-
-            (x, y) => {
-                match Command::new(x).args(y).spawn() {
-                    Ok(mut ok) => {
-                        ok.wait();
-                    }
-                    Err(error) => println!("Command not found")
+                false => {
+                    self.is_init = true;
                 }
             }
-            _ => ()
         }
+
+        self.start_shell()?;
+        Ok(())
     }
 }
