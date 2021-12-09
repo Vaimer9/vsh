@@ -1,22 +1,25 @@
-use std::path::{PathBuf, Path};
-use std::fs::File;
 use std::fs;
+use std::fs::File;
 use std::io;
+use std::path::{Path, PathBuf};
 
+use crate::eval::Internalcommand;
+use colored::*;
+use directories::ProjectDirs;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
-use directories::ProjectDirs;
-use colored::*;
-use crate::eval::Internalcommand;
 
 pub struct Prompt {
     character: char,
-    is_init: bool
+    is_init: bool,
 }
 
 impl Prompt {
     pub fn new(character: char) -> Self {
-        Self { character, is_init: false }
+        Self {
+            character,
+            is_init: false,
+        }
     }
 
     pub fn start_shell(&mut self) -> io::Result<()> {
@@ -37,19 +40,27 @@ impl Prompt {
             let dir_prompt = format!("   {}", current_dir);
             let shell_char = format!("{}", self.character);
 
-            println!("{}{}{}", "".truecolor(109, 152, 134), dir_prompt.on_truecolor(109, 152, 134).truecolor(33, 33, 33).bold(), "".truecolor(109, 152, 134));
+            println!(
+                "{}{}{}",
+                "".truecolor(109, 152, 134),
+                dir_prompt
+                    .on_truecolor(109, 152, 134)
+                    .truecolor(33, 33, 33)
+                    .bold(),
+                "".truecolor(109, 152, 134)
+            );
             let readline = rl.readline(format!("{} ", shell_char.green()).as_str());
-            
+
             match readline {
                 Ok(x) => {
                     rl.add_history_entry(x.as_str());
                     Internalcommand::new(x).eval()?;
-                },
-                Err(ReadlineError::Interrupted) => break, 
+                }
+                Err(ReadlineError::Interrupted) => break,
                 Err(ReadlineError::Eof) => break,
                 Err(err) => {
                     println!("Error: {:?}", err);
-                    break
+                    break;
                 }
             }
             // rl.save_history(&get_history_dir()).unwrap();
