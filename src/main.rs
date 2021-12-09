@@ -2,7 +2,7 @@ mod prompt;
 mod eval;
 
 use prompt::Prompt;
-use std::io;
+
 
 const shell_char: char = 'λ';
 

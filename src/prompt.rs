@@ -1,6 +1,3 @@
-use std::env;
-use std::env::args;
-use std::io::{stdin, stdout, Result, Write};
 use std::path::{PathBuf, Path};
 use std::fs::File;
 use std::fs;
@@ -8,8 +5,8 @@ use std::io;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
-use ansi_term::{Colour, Style};
 use directories::ProjectDirs;
+use colored::*;
 use crate::eval::Internalcommand;
 
 pub struct Prompt {
@@ -37,9 +34,11 @@ impl Prompt {
                 .into_os_string()
                 .into_string()
                 .unwrap();
+            let dir_prompt = format!("   {}", current_dir);
+            let shell_char = format!("{}", self.character);
 
-            println!("{}", Colour::Red.bold().paint(current_dir));
-            let readline = rl.readline(format!("{} ", self.character).as_str());
+            println!("{}{}{}", "".truecolor(109, 152, 134), dir_prompt.on_truecolor(109, 152, 134).truecolor(33, 33, 33).bold(), "".truecolor(109, 152, 134));
+            let readline = rl.readline(format!("{} ", shell_char.green()).as_str());
             
             match readline {
                 Ok(x) => {
@@ -63,7 +62,7 @@ impl Prompt {
             match Path::new(x.config_dir()).is_dir() {
                 true => {
                     fs::create_dir_all(x.config_dir())?;
-                    let mut file = File::create(x.config_dir().join("history.txt"))?;
+                    let _file = File::create(x.config_dir().join("history.txt"))?;
                 }
                 false => {
                     self.is_init = true;
