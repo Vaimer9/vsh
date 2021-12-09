@@ -33,7 +33,7 @@ impl Internalcommand {
 
             (x, y) => match *x.as_bytes().last().unwrap() as char {
                 '/' => commands::cd_for_string(x.to_string()),
-                x => commands::neutral(x.to_string(), y),
+                q => commands::neutral(x.to_string(), y),
             },
         }
         Ok(())
