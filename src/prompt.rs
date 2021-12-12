@@ -37,7 +37,7 @@ impl Prompt {
                 .into_os_string()
                 .into_string()
                 .unwrap();
-            let dir_prompt = format!("   {}", current_dir);
+            let dir_prompt = format!("   {} ", current_dir);
             let shell_char = format!("{}", self.character);
 
             println!(
@@ -56,7 +56,7 @@ impl Prompt {
                     rl.add_history_entry(x.as_str());
                     Internalcommand::new(x).eval()?;
                 }
-                Err(ReadlineError::Interrupted) => break,
+                Err(ReadlineError::Interrupted) => println!(),
                 Err(ReadlineError::Eof) => break,
                 Err(err) => {
                     println!("Error: {:?}", err);

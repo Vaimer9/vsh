@@ -23,7 +23,7 @@ impl Internalcommand {
 
     pub fn eval(&mut self) -> io::Result<()> {
         match (self.keyword.as_str(), self.args.clone()) {
-            ("cd", args) => commands::cd(args),
+            ("cd", args) => commands::cd(&args[0]),
 
             ("", _) => println!(),
 
@@ -31,9 +31,9 @@ impl Internalcommand {
                 process::exit(0);
             }
 
-            (x, y) => match *x.as_bytes().last().unwrap() as char {
-                '/' => commands::cd_for_string(x.to_string()),
-                q => commands::neutral(x.to_string(), y),
+            (x, args) => match *x.as_bytes().last().unwrap() as char {
+                '/' => commands::cd(&x.to_string()),
+                q => commands::neutral(x.to_string(), args),
             },
         }
         Ok(())
