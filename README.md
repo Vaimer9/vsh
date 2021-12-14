@@ -14,10 +14,11 @@ Now that the prompt has been given a complete overhaul, you will need need to in
 - [x] Run commands
 - [x] Exit with Ctrl+C & Ctrl+D via Rustyline
 - [x] Good looking prompt
-- [ ] Multiple Commands
+- [x] Multiple Commands
+- [x] Command History
+- [ ] Prompt Customization
 - [ ] Piping
 - [ ] Command Completion
-- [ ] Command History
 - [ ] `vsh` Scripting language :eyes:
 - [ ] Custom `ls` command
 - [ ] Intergration with `git`, `node` and `cargo`
