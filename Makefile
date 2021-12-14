@@ -6,3 +6,9 @@ check: format
 
 format:
 	cargo fmt
+
+ship: commit
+	git push -u origin main
+
+commit:
+	git commit -m 

@@ -1,4 +1,5 @@
 use crate::commands;
+use rustyline::Editor;
 use std::io;
 use std::process;
 use std::string::ToString;
@@ -6,6 +7,12 @@ use std::string::ToString;
 pub struct Internalcommand {
     keyword: String,
     args: Vec<String>,
+}
+
+pub enum CommandError {
+    Error,
+    Exit,
+    Ok,
 }
 
 impl Internalcommand {
@@ -21,21 +28,22 @@ impl Internalcommand {
         }
     }
 
-    pub fn eval(&mut self) -> io::Result<()> {
+    pub fn eval(&mut self) -> CommandError {
         match (self.keyword.as_str(), self.args.clone()) {
             ("cd", args) => commands::cd(&args[0]),
 
             ("", _) => println!(),
-
             ("exit", _) => {
-                process::exit(0);
+                return CommandError::Exit;
             }
 
             (x, args) => match *x.as_bytes().last().unwrap() as char {
                 '/' => commands::cd(&x.to_string()),
-                q => commands::neutral(x.to_string(), args),
+                _ => {
+                    return commands::neutral(x.to_string(), args);
+                }
             },
         }
-        Ok(())
+        CommandError::Ok
     }
 }
