@@ -82,41 +82,6 @@ impl Prompt {
             last_return = Self::run_linked_commands(com.into());
         }
         last_return
-        /* match x.split_once(";") {
-            None => match x.split_once("&&") {
-                None => Internalcommand::new(x).eval(),
-                Some((a, b)) => match Internalcommand::new(a.to_string()).eval() {
-                    // I can't figure out what this was trying to do, so I just commented it out
-                    // CommandError::Error => returner = CommandError::Ok,
-                    Ok(()) => {
-                        match Internalcommand::new(b.to_string()).eval() {
-                                CommandError::Ok | CommandError::Error => returner = CommandError::Ok,
-                                CommandError::Exit => returner = CommandError::Exit,
-                            },
-                    },
-                    Err(command_error) => {
-                        match command_error {
-                            CommandError::Ok => match Internalcommand::new(b.to_string()).eval() {
-                                CommandError::Ok | CommandError::Error => returner = CommandError::Ok,
-                                CommandError::Exit => returner = CommandError::Exit,
-                            },
-                            CommandError::Exit => returner = CommandError::Exit,
-                        }
-                    }
-                },
-            },
-            Some((a, b)) => {
-                match Internalcommand::new(a.to_string()).eval() {
-                    CommandError::Ok | CommandError::Error => returner = CommandError::Ok,
-                    CommandError::Exit => returner = CommandError::Exit,
-                }
-
-                match Internalcommand::new(b.to_string()).eval() {
-                    CommandError::Ok | CommandError::Error => returner = CommandError::Ok,
-                    CommandError::Exit => returner = CommandError::Exit,
-                }
-            }
-        } */
     }
     fn run_command(com: String) -> Result<(), CommandError> {
         Internalcommand::new(com.to_string()).eval()
