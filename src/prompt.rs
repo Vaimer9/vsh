@@ -1,13 +1,10 @@
 use std::env;
-use std::fs;
 use std::fs::File;
 use std::io;
-use std::path::{Path, PathBuf};
 use std::process;
 
 use crate::eval::{CommandError, Internalcommand};
 use colored::*;
-use directories::ProjectDirs;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
@@ -55,13 +52,15 @@ impl Prompt {
             match readline {
                 Ok(x) => {
                     rl.add_history_entry(x.as_str());
-                    match Self::run(x) {
-                        CommandError::Exit => {
-                            rl.save_history(&format!("{}/.vsh_history", home_dir))
-                                .expect("Couldn't Save History");
-                            process::exit(0);
+                    if let Err(e) = Self::run(x) {
+                        match e {
+                            CommandError::Exit => {
+                                rl.save_history(&format!("{}/.vsh_history", home_dir))
+                                    .expect("Couldn't Save History");
+                                process::exit(0);
+                            }
+                            _ => {}, // TODO: What should happen if an error is returned?
                         }
-                        CommandError::Ok | CommandError::Error => (),
                     }
                 }
                 Err(ReadlineError::Interrupted) => println!(),
@@ -77,20 +76,33 @@ impl Prompt {
         Ok(())
     }
 
-    pub fn run(x: String) -> CommandError {
-        let mut returner = CommandError::Ok;
-
-        // TODO: Refactor this wall of match :[
-        match x.split_once(";") {
+    pub fn run(x: String) -> Result<(), CommandError> {
+        let mut last_return = Ok(());
+        for com in x.split(";") {
+            last_return = Self::run_linked_commands(com.into());
+        }
+        last_return
+        /* match x.split_once(";") {
             None => match x.split_once("&&") {
-                None => return Internalcommand::new(x).eval(),
+                None => Internalcommand::new(x).eval(),
                 Some((a, b)) => match Internalcommand::new(a.to_string()).eval() {
-                    CommandError::Error => returner = CommandError::Ok,
-                    CommandError::Ok => match Internalcommand::new(b.to_string()).eval() {
-                        CommandError::Ok | CommandError::Error => returner = CommandError::Ok,
-                        CommandError::Exit => returner = CommandError::Exit,
+                    // I can't figure out what this was trying to do, so I just commented it out
+                    // CommandError::Error => returner = CommandError::Ok,
+                    Ok(()) => {
+                        match Internalcommand::new(b.to_string()).eval() {
+                                CommandError::Ok | CommandError::Error => returner = CommandError::Ok,
+                                CommandError::Exit => returner = CommandError::Exit,
+                            },
                     },
-                    CommandError::Exit => returner = CommandError::Exit,
+                    Err(command_error) => {
+                        match command_error {
+                            CommandError::Ok => match Internalcommand::new(b.to_string()).eval() {
+                                CommandError::Ok | CommandError::Error => returner = CommandError::Ok,
+                                CommandError::Exit => returner = CommandError::Exit,
+                            },
+                            CommandError::Exit => returner = CommandError::Exit,
+                        }
+                    }
                 },
             },
             Some((a, b)) => {
@@ -104,7 +116,17 @@ impl Prompt {
                     CommandError::Exit => returner = CommandError::Exit,
                 }
             }
+        } */
+    }
+    fn run_command(com: String) -> Result<(), CommandError> {
+        Internalcommand::new(com.to_string()).eval()
+    }
+    fn run_linked_commands(commands: String) -> Result<(), CommandError> {
+        for linked_com in commands.split("&&") {
+            if let Err(e) = Self::run_command(linked_com.to_string()) {
+                return Err(e);
+            }
         }
-        returner
+        Ok(())
     }
 }
