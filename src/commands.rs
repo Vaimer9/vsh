@@ -4,10 +4,15 @@ use std::process::Command;
 
 use crate::eval::CommandError;
 
-pub fn cd(arg: &String) {
-    match env::set_current_dir(Path::new(&arg)) {
-        Ok(_) => (),
-        Err(_) => eprintln!("No such directory"),
+pub fn cd(arg: Option<&String>) {
+    match arg {
+        Some(dir ) => {
+            match env::set_current_dir(Path::new(dir)) {
+                Ok(_) => (),
+                Err(_) => eprintln!("No such directory"),
+            }
+        }
+        None => env::set_current_dir(env::var("HOME").unwrap()).expect("Could not go to home directory!"), // HOME will always be set
     }
 }
 

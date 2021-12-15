@@ -28,15 +28,13 @@ impl Internalcommand {
 
     pub fn eval(&mut self) -> Result<(), CommandError> {
         match (self.keyword.as_str(), self.args.clone()) {
-            ("cd", args) => commands::cd(&args[0]),
-
+            ("cd", args) => commands::cd(args.get(0)),
             ("", _) => println!(),
             ("exit", _) => {
                 return Err(CommandError::Exit);
-            }
-
+            },
             (x, args) => match *x.as_bytes().last().unwrap() as char {
-                '/' => commands::cd(&x.to_string()),
+                '/' => commands::cd(Some(&x.to_string())),
                 _ => {
                     return commands::neutral(x.to_string(), args);
                 }
