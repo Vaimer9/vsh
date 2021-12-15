@@ -1,7 +1,4 @@
 use crate::commands;
-use rustyline::Editor;
-use std::io;
-use std::process;
 use std::string::ToString;
 
 pub struct Internalcommand {
@@ -12,7 +9,8 @@ pub struct Internalcommand {
 pub enum CommandError {
     Error,
     Exit,
-    Ok,
+    Finished(i32), // If the program finished with a non-zero exit code
+    Terminated(i32) // If the program was terminated by the user
 }
 
 impl Internalcommand {
@@ -28,13 +26,13 @@ impl Internalcommand {
         }
     }
 
-    pub fn eval(&mut self) -> CommandError {
+    pub fn eval(&mut self) -> Result<(), CommandError> {
         match (self.keyword.as_str(), self.args.clone()) {
             ("cd", args) => commands::cd(&args[0]),
 
             ("", _) => println!(),
             ("exit", _) => {
-                return CommandError::Exit;
+                return Err(CommandError::Exit);
             }
 
             (x, args) => match *x.as_bytes().last().unwrap() as char {
@@ -44,6 +42,6 @@ impl Internalcommand {
                 }
             },
         }
-        CommandError::Ok
+        Ok(())
     }
 }
