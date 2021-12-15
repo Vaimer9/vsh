@@ -1,13 +1,14 @@
 use std::env;
 use std::path::Path;
 use std::process::Command;
+use lazy_static::lazy_static;
 
 use crate::eval::CommandError;
 
 pub fn cd(arg: Option<&String>) {
     match arg {
-        Some(dir ) => {
-            match env::set_current_dir(Path::new(dir)) {
+        Some(dir) => {
+            match env::set_current_dir(Path::new(&expand(dir.to_string()))) {
                 Ok(_) => (),
                 Err(_) => eprintln!("No such directory"),
             }
@@ -17,7 +18,8 @@ pub fn cd(arg: Option<&String>) {
 }
 
 pub fn neutral(x: String, y: Vec<String>) -> Result<(), CommandError> {
-    match Command::new(&x).args(y).spawn() {
+    let args = y.into_iter().map(expand).collect::<Vec<_>>();
+    match Command::new(&x).args(args).spawn() {
         Ok(mut ok) => {
             if let Ok(status) = ok.wait() {
                 match status.code() {
@@ -42,4 +44,13 @@ pub fn neutral(x: String, y: Vec<String>) -> Result<(), CommandError> {
             Err(CommandError::Error)
         }
     }
+}
+
+// Expand values. For now this is used only to expand ~ into $HOME,
+// but it could easily be modified to be used for variables
+fn expand(raw: String) -> String {
+    lazy_static! {
+        static ref RE: fancy_regex::Regex = fancy_regex::Regex::new("(?<!\\\\)\\~").unwrap();
+    }
+    RE.replace_all(&raw, env::var("HOME").unwrap()).to_string()
 }
