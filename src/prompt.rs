@@ -59,7 +59,7 @@ impl Prompt {
                                     .expect("Couldn't Save History");
                                 process::exit(0);
                             }
-                            _ => {}, // TODO: What should happen if an error is returned?
+                            _ => {} // TODO: What should happen if an error is returned?
                         }
                     }
                 }

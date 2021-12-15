@@ -9,8 +9,8 @@ pub struct Internalcommand {
 pub enum CommandError {
     Error,
     Exit,
-    Finished(i32), // If the program finished with a non-zero exit code
-    Terminated(i32) // If the program was terminated by the user
+    Finished(i32),   // If the program finished with a non-zero exit code
+    Terminated(i32), // If the program was terminated by the user
 }
 
 impl Internalcommand {
@@ -32,7 +32,7 @@ impl Internalcommand {
             ("", _) => println!(),
             ("exit", _) => {
                 return Err(CommandError::Exit);
-            },
+            }
             (x, args) => match *x.as_bytes().last().unwrap() as char {
                 '/' => commands::cd(Some(&x.to_string())),
                 _ => {

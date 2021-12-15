@@ -1,19 +1,18 @@
+use lazy_static::lazy_static;
 use std::env;
 use std::path::Path;
 use std::process::Command;
-use lazy_static::lazy_static;
 
 use crate::eval::CommandError;
 
 pub fn cd(arg: Option<&String>) {
     match arg {
-        Some(dir) => {
-            match env::set_current_dir(Path::new(&expand(dir.to_string()))) {
-                Ok(_) => (),
-                Err(_) => eprintln!("No such directory"),
-            }
-        }
-        None => env::set_current_dir(env::var("HOME").unwrap()).expect("Could not go to home directory!"), // HOME will always be set
+        Some(dir) => match env::set_current_dir(Path::new(&expand(dir.to_string()))) {
+            Ok(_) => (),
+            Err(_) => eprintln!("No such directory"),
+        },
+        None => env::set_current_dir(env::var("HOME").unwrap())
+            .expect("Could not go to home directory!"), // HOME will always be set
     }
 }
 
@@ -29,7 +28,7 @@ pub fn neutral(x: String, y: Vec<String>) -> Result<(), CommandError> {
                         } else {
                             Ok(())
                         }
-                    },
+                    }
                     // This is only returned if the process was terminated by user
                     None => Err(CommandError::Terminated(127)), // Unfortunately getting the signal is still in nightly
                 }
