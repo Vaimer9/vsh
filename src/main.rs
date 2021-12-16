@@ -1,11 +1,12 @@
 mod commands;
 mod eval;
 mod prompt;
+mod repl;
 
-use prompt::Prompt;
+use repl::Repl;
 
 const SHELL_CHAR: char = 'λ';
 
 fn main() {
-    Prompt::new(SHELL_CHAR).start_shell().unwrap();
+    Repl::new(SHELL_CHAR).start_shell().unwrap();
 }
