@@ -1,16 +1,6 @@
 use serde_json::Value;
 
-fn get_json() -> Value {
-    let v: Value = serde_json::from_str(&fetch_data);
-}
-
-fn validate_json_value(x: Option<&str>) -> Option<String> {
-    match x {
-         => None,
-        Some(x) => return x.to_string()
-    }
-}
-
+// There will be more don't worry this file is not clutter
 fn fetch_data() -> String {
     path = format!("{}/.vshrc.json", env::var("HOME").unwrap());
     let mut data = String::new();
