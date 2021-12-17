@@ -1,7 +1,3 @@
-use std::env;
-use std::fs::File;
-use std::io::Read;
-
 use crate::utils::{fetch_data, BASE_JSON};
 
 use colored::*;
@@ -28,7 +24,7 @@ impl Prompt {
         let mut text_color = (33, 33, 33);
         let mut promptchar = String::from("λ");
         let mut double = false;
-        let mut rt = Self::Classic {
+        let rt = Self::Classic {
             promptchar: promptchar.clone(),
             double,
         };
@@ -56,7 +52,7 @@ impl Prompt {
         if let Ok(y) = Prompt::raw_json() {
             let x = &y["text_color"];
             if *x != Value::Null {
-                color = (
+                text_color = (
                     x[0].to_string()
                         .replace("\"", "")
                         .parse::<u8>()
@@ -87,16 +83,20 @@ impl Prompt {
 
         if let Some(x) = Prompt::json_value("style") {
             match x.to_uppercase().as_str() {
-                "\"MODERN\"" => {
-                    eprintln!("LESGOO");
-                    Self::Modern {
-                        promptchar,
-                        color,
-                        text_color,
-                        double,
-                    }
+                "\"MODERN\"" => Self::Modern {
+                    promptchar,
+                    color,
+                    text_color,
+                    double,
+                },
+                "\"CLASSIC\"" => Self::Classic { promptchar, double },
+                x => {
+                    eprintln!(
+                        "vsh: Error Parsing `.vshrc.json`\nNo such theme as \"{}\"",
+                        x
+                    );
+                    Self::Classic { promptchar, double }
                 }
-                "\"CLASSIC\"" | _ => Self::Classic { promptchar, double },
             }
         } else {
             rt
@@ -105,18 +105,18 @@ impl Prompt {
 
     fn json_value(name: &str) -> Option<String> {
         let data = fetch_data();
-        
+
         match serde_json::from_str::<Value>(&data) {
             Ok(v) => {
                 if Value::Null == v[name] {
-                    return None;
+                    None
                 } else {
-                    return Some(v[name].to_string());
+                    Some(v[name].to_string())
                 }
             }
             Err(e) => {
                 eprintln!("vsh: Error parsing data\n{}", e);
-                return Some(String::from("{}"));
+                Some(String::from("{}"))
             }
         }
     }
@@ -138,7 +138,6 @@ impl Prompt {
             .into_os_string()
             .into_string()
             .unwrap(); // Won't panic
-        let lr = String::new();
         match self {
             Self::Modern {
                 promptchar,
@@ -152,7 +151,9 @@ impl Prompt {
                     .on_truecolor(color.0, color.1, color.2)
                     .truecolor(text_color.0, text_color.1, text_color.2)
                     .bold();
-                let pr_char = format!("{}", promptchar.replace("\"", "")).truecolor(color.0, color.1, color.2);
+                let pr_char = promptchar
+                    .replace("\"", "")
+                    .truecolor(color.0, color.1, color.2);
 
                 if *double {
                     format!("{}{}{}\n{} ", backarrow, directory, forwardarrow, pr_char)

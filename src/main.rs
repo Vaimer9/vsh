@@ -6,8 +6,6 @@ mod utils;
 
 use repl::Repl;
 
-const SHELL_CHAR: char = 'λ';
-
 fn main() {
-    Repl::new(SHELL_CHAR).start_shell().unwrap();
+    Repl::new().start_shell().unwrap();
 }

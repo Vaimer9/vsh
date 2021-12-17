@@ -6,17 +6,14 @@ use std::process;
 use crate::eval::{CommandError, Internalcommand};
 use crate::prompt::Prompt;
 
-use colored::*;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-pub struct Repl {
-    character: char,
-}
+pub struct Repl {}
 
 impl Repl {
-    pub fn new(character: char) -> Self {
-        Self { character }
+    pub fn new() -> Self {
+        Self {}
     }
 
     pub fn start_shell(&mut self) -> io::Result<()> {
@@ -45,7 +42,7 @@ impl Repl {
                                     .expect("Couldn't Save History");
                                 process::exit(0);
                             }
-                            _ => continue // TODO: What should happen if an error is returned?
+                            _ => continue, // TODO: What should happen if an error is returned?
                         }
                     }
                 }
@@ -64,13 +61,13 @@ impl Repl {
 
     pub fn run(x: String) -> Result<(), CommandError> {
         let mut last_return = Ok(());
-        for com in x.split(";") {
+        for com in x.split(';') {
             last_return = Self::run_linked_commands(com.into());
         }
         last_return
     }
     fn run_command(com: String) -> Result<(), CommandError> {
-        Internalcommand::new(com.to_string()).eval()
+        Internalcommand::new(com).eval()
     }
     fn run_linked_commands(commands: String) -> Result<(), CommandError> {
         for linked_com in commands.split("&&") {
