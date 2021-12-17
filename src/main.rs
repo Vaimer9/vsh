@@ -2,6 +2,7 @@ mod commands;
 mod eval;
 mod prompt;
 mod repl;
+mod utils;
 
 use repl::Repl;
 

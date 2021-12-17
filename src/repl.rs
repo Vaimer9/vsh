@@ -4,6 +4,8 @@ use std::io;
 use std::process;
 
 use crate::eval::{CommandError, Internalcommand};
+use crate::prompt::Prompt;
+
 use colored::*;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
@@ -28,26 +30,10 @@ impl Repl {
             eprintln!("No previous history.");
             File::create(format!("{}/.vsh_history", home_dir)).expect("Can't create history File!");
         }
+        let prompt = Prompt::new().generate_prompt();
 
         loop {
-            let current_dir = std::env::current_dir()
-                .unwrap()
-                .into_os_string()
-                .into_string()
-                .unwrap();
-            let dir_prompt = format!("   {} ", current_dir);
-            let shell_char = format!("{}", self.character);
-
-            println!(
-                "{}{}{}",
-                "".truecolor(109, 152, 134),
-                dir_prompt
-                    .on_truecolor(109, 152, 134)
-                    .truecolor(33, 33, 33)
-                    .bold(),
-                "".truecolor(109, 152, 134)
-            );
-            let readline = rl.readline(format!("{} ", shell_char.green()).as_str());
+            let readline = rl.readline(prompt.as_str());
 
             match readline {
                 Ok(x) => {
@@ -59,7 +45,7 @@ impl Repl {
                                     .expect("Couldn't Save History");
                                 process::exit(0);
                             }
-                            _ => {} // TODO: What should happen if an error is returned?
+                            _ => continue // TODO: What should happen if an error is returned?
                         }
                     }
                 }

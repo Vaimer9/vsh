@@ -39,7 +39,7 @@ pub fn neutral(x: String, y: Vec<String>) -> Result<(), CommandError> {
             }
         }
         Err(_) => {
-            eprintln!("No such command as `{}`", x);
+            eprintln!("vsh: No such command as `{}`", x);
             Err(CommandError::Error)
         }
     }
