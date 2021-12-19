@@ -27,16 +27,17 @@ def check_for_rustc():
     print("Do you have rust compiler installed or not?: (y, n)")
     x = input("> ")
     if x == "y":
-        return True
-    elif x  =="n":
         return False
+    elif x  == "n":
+        return True
     else:
         print("Please enter correct value")
-        check_for_rustc()
+        exit()
 
 def main():
     print(logo)
-    if get_input() == 1:
+    x = get_input()
+    if x == 1:
         x = get_version()
         print("Installing binary in current Directory")
         if x == "l":
@@ -45,7 +46,8 @@ def main():
             os.system(f'wget https://github.com/Vaimer9/vsh/releases/download/{x}/vsh')
         os.system("chmod +x vsh")
 
-    elif get_input == 2:
+    elif x == 2:
+        
         if check_for_rustc():
             print("Installing Rustc")
             os.system("curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh")
