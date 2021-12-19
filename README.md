@@ -94,3 +94,9 @@ As you can see customizing is not that hard and doesn't require too much code. I
 - [ ] Intergration with `git`, `node` and `cargo`
 - [ ] Customization via `.vshrc`
 - [ ] Plugin Support (Yikes!)
+
+## License
+
+Licensed under a Mozilla Public License.
+
+For more information take a look at the license [here](./LICENSE).
