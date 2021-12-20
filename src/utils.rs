@@ -9,7 +9,7 @@ pub const BASE_JSON: &str = r#"
 }
 "#;
 
-lazy_static::lazy_static!{
+lazy_static::lazy_static! {
     pub static ref DATA: String = fetch_data();
 }
 

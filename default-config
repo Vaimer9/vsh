@@ -1,0 +1,9 @@
+
+{
+    "color": [109, 152, 134],
+    "text_color": [33, 333, 33],
+    "err_color": [217, 33, 33],
+    "double": true,
+    "character": "λ",
+    "style": "MODERN"
+}

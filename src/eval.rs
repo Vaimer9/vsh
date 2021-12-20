@@ -2,20 +2,13 @@ use lazy_static::lazy_static;
 use std::{
     env,
     os::unix::prelude::CommandExt,
-    process::{Child, Command},
+    process::Command,
     string::ToString,
-    sync::mpsc::Sender,
 };
-
-/* pub struct Internalcommand {
-    keyword: String,
-    args: Vec<String>,
-} */
 
 pub enum CommandError {
     Error(Option<&'static str>),
     Exit(Option<i32>),
-    Terminated(i32), // If the program was terminated by the user
 }
 
 // TODO: Stop relying so much on regexes when they're not really needed
@@ -27,7 +20,7 @@ lazy_static! {
 
 #[derive(Debug)]
 pub struct InternalCommand {
-    orig: String,
+    orig: String,   // These two fields are going to be used when asynchronous commands (called with "&") are implemented
     not_sync: bool,
     commands: CommandStructure,
 }
@@ -64,12 +57,11 @@ pub enum Instruction {
     Incorrect(String),
 }
 
-
 impl Instruction {
     fn new(com: String, mut args: Vec<String>) -> Self {
         match (com.as_ref(), &args) {
             ("cd", _) => {
-                let t = if args.len() > 0 {
+                let t = if !args.is_empty() {
                     Some(args.remove(0))
                 } else {
                     None
@@ -78,7 +70,7 @@ impl Instruction {
             }
             ("exec", _) => {
                 let com;
-                if args.len() > 0 {
+                if !args.is_empty() {
                     com = args.remove(0);
                 } else {
                     com = String::new();
@@ -99,7 +91,13 @@ impl Instruction {
                 }
             }
             ("", _) => Self::Empty,
-            (_, _) => Self::Normal { command: com, args },
+            (c, _) => {
+                match *c.as_bytes().last().unwrap() as char {
+                    // Cannot be empty, case was covered above
+                    '/' => Self::Cd(Some(com)),
+                    _ => Self::Normal { command: com, args },
+                }
+            }
         }
     }
 }
@@ -132,7 +130,6 @@ impl InternalCommand {
 }
 
 impl CommandStructure {
-
     fn construct(mut i: Vec<String>) -> Result<CommandStructure, CommandError> {
         if i.is_empty() {
             return Ok(Self::Uncalled(Instruction::Empty));
@@ -201,54 +198,52 @@ impl CommandStructure {
                 lhs.call()?;
                 rhs.call()
             }
-            CommandStructure::Uncalled(inst) => {
-                match inst {
-                    Instruction::Exit(code) => Err(CommandError::Exit(*code)),
-                    Instruction::Cd(dir) => {
-                        if let Some(d) = dir {
-                            match env::set_current_dir(d) {
-                                Ok(()) => Ok(0),
-                                Err(_) => Err(CommandError::Error(Some("No such directory!"))),
-                            }
-                        } else {
-                            env::set_current_dir(env::var("HOME").unwrap()).unwrap();
-                            Ok(0)
+            CommandStructure::Uncalled(inst) => match inst {
+                Instruction::Exit(code) => Err(CommandError::Exit(*code)),
+                Instruction::Cd(dir) => {
+                    if let Some(d) = dir {
+                        match env::set_current_dir(d) {
+                            Ok(()) => Ok(0),
+                            Err(_) => Err(CommandError::Error(Some("No such directory!"))),
                         }
-                    }
-                    Instruction::Normal { command, args } => {
-                        match Command::new(command).args(args).spawn() {
-                            Err(_) => Err(CommandError::Error(Some("vsh: No such command."))),
-                            Ok(child) => match child.wait_with_output() {
-                                Err(e) => Err(CommandError::Error(None)),
-                                Ok(o) => {
-                                    *self = CommandStructure::Finished {
-                                        return_code: o.status.code().unwrap_or(127),
-                                        stdout: String::from_utf8(o.stdout).unwrap_or_default(),
-                                        stderr: String::from_utf8(o.stderr).unwrap_or_default(),
-                                    };
-                                    Ok(o.status.code().unwrap_or(127))
-                                }
-                            },
-                        }
-                    }
-                    Instruction::Exec { command, args } => {
-                        Command::new(command).args(args).exec();
-                        Err(CommandError::Error(Some("vsh: command not found")))
-                    }
-                    Instruction::Empty => {
-                        println!();
+                    } else {
+                        env::set_current_dir(env::var("HOME").unwrap()).unwrap();
                         Ok(0)
                     }
-                    Instruction::Incorrect(msg) => {
-                        eprintln!("{}", msg);
-                        Err(CommandError::Error(None))
+                }
+                Instruction::Normal { command, args } => {
+                    match Command::new(command).args(args).spawn() {
+                        Err(_) => Err(CommandError::Error(Some("vsh: No such command."))),
+                        Ok(child) => match child.wait_with_output() {
+                            Err(_) => Err(CommandError::Error(None)),
+                            Ok(o) => {
+                                *self = CommandStructure::Finished {
+                                    return_code: o.status.code().unwrap_or(127),
+                                    stdout: String::from_utf8(o.stdout).unwrap_or_default(),
+                                    stderr: String::from_utf8(o.stderr).unwrap_or_default(),
+                                };
+                                Ok(o.status.code().unwrap_or(127))
+                            }
+                        },
                     }
                 }
-            }
+                Instruction::Exec { command, args } => {
+                    Command::new(command).args(args).exec();
+                    Err(CommandError::Error(Some("vsh: command not found")))
+                }
+                Instruction::Empty => {
+                    println!();
+                    Ok(0)
+                }
+                Instruction::Incorrect(msg) => {
+                    eprintln!("{}", msg);
+                    Err(CommandError::Error(None))
+                }
+            },
             CommandStructure::Finished {
                 return_code,
-                stdout,
-                stderr,
+                stdout: _,
+                stderr: _,
             } => Ok(*return_code),
         }
     }
@@ -261,6 +256,7 @@ fn format_quotes(i: Vec<String>) -> Result<Vec<String>, CommandError> {
         if QUOTE_START.is_match(&word).unwrap() {
             if curr.is_none() {
                 word.remove(0);
+                word.push(' ');
                 curr = Some(word);
                 continue;
             } else {
@@ -271,12 +267,14 @@ fn format_quotes(i: Vec<String>) -> Result<Vec<String>, CommandError> {
         if curr.is_some() {
             if !QUOTE_END.is_match(&word).unwrap() {
                 curr = curr.map(|mut x| {
-                    x.extend(word.chars());
+                    x.push(' ');
+                    x.push_str(&word);
                     x
                 });
             } else {
+                word.remove(word.len() - 1);
                 let mut to_append = curr.take().unwrap();
-                to_append.extend(word.chars());
+                to_append.push_str(&word);
                 to_return.push(to_append);
             }
             continue;

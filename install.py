@@ -77,6 +77,20 @@ def check_for_rustc():
             print("Please enter correct value")
             continue
 
+def install_default_config_file():
+    input("Do you want to automatically install the default configuration file?: (y, n)")
+    while True:
+        x = input("> ")
+        if x.lower() == "y":
+            break
+        elif x.lower()  == "n":
+            return
+        else:
+            print("Please enter correct value")
+            continue
+    os.system(f"cp ./default-config {os.environ['HOME']}/.vshrc.json")
+
+
 def main():
     print(logo)
     x = get_input()
@@ -112,6 +126,8 @@ def main():
         os.system("cd vsh")
         os.system("cargo build --release")
         print("The Binary is created inside target/release directory")
+
+    install_default_config_file()
 
 
 if __name__ == '__main__':

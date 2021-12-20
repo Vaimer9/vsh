@@ -1,7 +1,6 @@
 use std::env;
 use std::fs::File;
 use std::io;
-use std::process;
 
 use crate::eval::InternalCommand;
 use crate::{eval::CommandError, prompt::Prompt};
@@ -50,32 +49,25 @@ impl Repl {
                                 }
                                 _ => continue, // TODO: What should happen if an error is returned?
                             }
-                        },
-                        Ok(mut com) => {
-                            match com.call() {
-                                Ok(ret_code) => {
-                                    last_return_val = ret_code;
-                                },
-                                Err(e) => {
-                                    match e {
-                                        CommandError::Error(msg) => {
-                                            if let Some(st) = msg {
-                                                eprintln!("{}", st);
-                                                last_return_val = 1;
-                                            }
-                                        },
-                                        CommandError::Exit(code) => {
-                                            rl.save_history(&format!("{}/.vsh_history", home_dir))
-                                                .expect("Couldn't Save History");
-                                            return Ok(code.unwrap_or(0))
-                                        },
-                                        CommandError::Terminated(code) => {
-                                            last_return_val = code;
-                                        },
+                        }
+                        Ok(mut com) => match com.call() {
+                            Ok(ret_code) => {
+                                last_return_val = ret_code;
+                            }
+                            Err(e) => match e {
+                                CommandError::Error(msg) => {
+                                    if let Some(st) = msg {
+                                        eprintln!("{}", st);
+                                        last_return_val = 1;
                                     }
                                 }
-                            }
-                        }
+                                CommandError::Exit(code) => {
+                                    rl.save_history(&format!("{}/.vsh_history", home_dir))
+                                        .expect("Couldn't Save History");
+                                    return Ok(code.unwrap_or(0));
+                                }
+                            },
+                        },
                     }
                 }
                 Err(ReadlineError::Interrupted) => println!(),

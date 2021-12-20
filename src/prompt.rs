@@ -10,10 +10,10 @@ pub enum Prompt {
         color: (u8, u8, u8), // Background color
         text_color: (u8, u8, u8),
         err_color: (u8, u8, u8), // Colour when a process returns a non-zero exit code
-        double: bool, // double line
+        double: bool,            // double line
     },
     Classic {
-        promptchar: String, // prompt charecter
+        prompt: String, // prompt charecter
         double: bool,       // double line
     },
 }
@@ -23,16 +23,22 @@ fn get_triple_val(data: &Value, wanted: &str) -> Result<(u8, u8, u8), String> {
     if *x == Value::Null {
         return Err(format!("Value {} is null in `.vshrc.json`!", wanted));
     }
-        let val0 = x[0].to_string()
-                .replace("\"", "")
-                .parse::<u8>().map_err(|_| format!("Value {} is not parseable!", x[0].to_string()))?;
-        let val1 = x[1].to_string()
-                .replace("\"", "")
-                .parse::<u8>().map_err(|_| format!("Value {} is not parseable!", x[1].to_string()))?;
-        let val2 = x[2].to_string()
-                .replace("\"", "")
-                .parse::<u8>().map_err(|_| format!("Value {} is not parseable!", x[2].to_string()))?;
-        Ok((val0, val1, val2))
+    let val0 = x[0]
+        .to_string()
+        .replace("\"", "")
+        .parse::<u8>()
+        .map_err(|_| format!("Value {} is not parseable!", x[0]))?;
+    let val1 = x[1]
+        .to_string()
+        .replace("\"", "")
+        .parse::<u8>()
+        .map_err(|_| format!("Value {} is not parseable!", x[1]))?;
+    let val2 = x[2]
+        .to_string()
+        .replace("\"", "")
+        .parse::<u8>()
+        .map_err(|_| format!("Value {} is not parseable!", x[2]))?;
+    Ok((val0, val1, val2))
 }
 
 impl Prompt {
@@ -44,7 +50,7 @@ impl Prompt {
         let mut err_color = (217, 33, 33);
         let mut double = false;
         let rt = Self::Classic {
-            promptchar: prompt_str.clone(),
+            prompt: prompt_str.clone(),
             double,
         };
 
@@ -70,6 +76,7 @@ impl Prompt {
 
         // TODO: Changeable PS1/theme
         if let Some(x) = Prompt::json_value("style") {
+            #[allow(clippy::match_str_case_mismatch)]
             match x.to_uppercase().as_str() {
                 "\"MODERN\"" => Self::Modern {
                     prompt: prompt_str,
@@ -78,13 +85,19 @@ impl Prompt {
                     err_color,
                     double,
                 },
-                "\"CLASSIC\"" => Self::Classic { promptchar: prompt_str, double },
+                "\"CLASSIC\"" => Self::Classic {
+                    prompt: prompt_str,
+                    double,
+                },
                 x => {
                     eprintln!(
                         "vsh: Error Parsing `.vshrc.json`\nNo such theme as \"{}\"",
                         x
                     );
-                    Self::Classic { promptchar: prompt_str, double }
+                    Self::Classic {
+                        prompt: prompt_str,
+                        double,
+                    }
                 }
             }
         } else {
@@ -143,23 +156,25 @@ impl Prompt {
                     .truecolor(color.0, color.1, color.2);
 
                 let err_msg = format!("[{}]", last_proc_num)
-                    .truecolor(err_color.0, err_color.1, err_color.2).bold();
+                    .truecolor(err_color.0, err_color.1, err_color.2)
+                    .bold();
 
                 if *double {
                     if last_proc_num != 0 {
-                        format!("{}{}{} {}\n{} ", backarrow, directory, forwardarrow, err_msg, pr_char)
+                        format!(
+                            "{}{}{} {}\n{} ",
+                            backarrow, directory, forwardarrow, err_msg, pr_char
+                        )
                     } else {
                         format!("{}{}{}\n{} ", backarrow, directory, forwardarrow, pr_char)
                     }
+                } else if last_proc_num != 0 {
+                    format!("{}{} {} ", directory, forwardarrow, err_msg)
                 } else {
-                    if last_proc_num != 0 {
-                        format!("{}{} {} ", directory, forwardarrow, err_msg)
-                    } else {
-                        format!("{}{} ", directory, forwardarrow)
-                    }
+                    format!("{}{} ", directory, forwardarrow)
                 }
             }
-            Self::Classic { promptchar, double } => {
+            Self::Classic { prompt: promptchar, double } => {
                 if *double {
                     format!("[{}]\n{} ", current_dir, promptchar)
                 } else {
