@@ -1,10 +1,5 @@
 use lazy_static::lazy_static;
-use std::{
-    env,
-    os::unix::prelude::CommandExt,
-    process::Command,
-    string::ToString,
-};
+use std::{env, os::unix::prelude::CommandExt, process::Command, string::ToString};
 
 pub enum CommandError {
     Error(Option<&'static str>),
@@ -20,7 +15,7 @@ lazy_static! {
 
 #[derive(Debug)]
 pub struct InternalCommand {
-    orig: String,   // These two fields are going to be used when asynchronous commands (called with "&") are implemented
+    orig: String, // These two fields are going to be used when asynchronous commands (called with "&") are implemented
     not_sync: bool,
     commands: CommandStructure,
 }
@@ -208,7 +203,7 @@ impl CommandStructure {
                         }
                     } else {
                         if let Err(_) = env::set_current_dir(env::var("HOME").unwrap()) {
-                                eprintln!("vsh: could not enter home directory")
+                            eprintln!("vsh: could not enter home directory")
                         }
                         Ok(1)
                     }

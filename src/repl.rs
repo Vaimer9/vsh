@@ -64,7 +64,9 @@ impl Repl {
                                     }
                                 }
                                 CommandError::Exit(code) => {
-                                    if let Err(_) = rl.save_history(&format!("{}/.vsh_history", home_dir)) {
+                                    if let Err(_) =
+                                        rl.save_history(&format!("{}/.vsh_history", home_dir))
+                                    {
                                         eprintln!("vsh: could not save command history!")
                                     }
                                     return Ok(code.unwrap_or(0));

@@ -14,7 +14,7 @@ pub enum Prompt {
     },
     Classic {
         prompt: String, // prompt charecter
-        double: bool,       // double line
+        double: bool,   // double line
     },
 }
 
@@ -174,7 +174,10 @@ impl Prompt {
                     format!("{}{} ", directory, forwardarrow)
                 }
             }
-            Self::Classic { prompt: promptchar, double } => {
+            Self::Classic {
+                prompt: promptchar,
+                double,
+            } => {
                 if *double {
                     format!("[{}]\n{} ", current_dir, promptchar)
                 } else {
