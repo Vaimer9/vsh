@@ -9,7 +9,11 @@ pub const BASE_JSON: &str = r#"
 }
 "#;
 
-pub fn fetch_data() -> String {
+lazy_static::lazy_static!{
+    pub static ref DATA: String = fetch_data();
+}
+
+fn fetch_data() -> String {
     let mut path = PathBuf::from(env::var("HOME").unwrap());
     path.push(".vshrc.json");
 

@@ -1,4 +1,4 @@
-use crate::utils::{fetch_data, BASE_JSON};
+use crate::utils::{BASE_JSON, DATA};
 
 use colored::*;
 use serde_json::Value;
@@ -93,9 +93,7 @@ impl Prompt {
     }
 
     fn json_value(name: &str) -> Option<String> {
-        let data = fetch_data();
-
-        match serde_json::from_str::<Value>(&data) {
+        match serde_json::from_str::<Value>(&DATA) {
             Ok(v) => {
                 if Value::Null == v[name] {
                     None
@@ -111,8 +109,7 @@ impl Prompt {
     }
 
     fn raw_json() -> std::io::Result<Value> {
-        let data = fetch_data();
-        match serde_json::from_str(&data) {
+        match serde_json::from_str(&DATA) {
             Ok(a) => Ok(a),
             Err(x) => {
                 eprintln!("vsh: Error parsing data\n{}", x);
