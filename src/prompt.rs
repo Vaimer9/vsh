@@ -6,9 +6,10 @@ use serde_json::Value;
 #[derive(Debug)]
 pub enum Prompt {
     Modern {
-        promptchar: String, // prompt charecter, the reason that It is a String is because I want the user to also have prompts such as `->` or `--# `
+        prompt: String,
         color: (u8, u8, u8), // Background color
         text_color: (u8, u8, u8),
+        err_color: (u8, u8, u8), // Colour when a process returns a non-zero exit code
         double: bool, // double line
     },
     Classic {
@@ -17,85 +18,73 @@ pub enum Prompt {
     },
 }
 
+fn get_triple_val(data: &Value, wanted: &str) -> Result<(u8, u8, u8), String> {
+    let x = &data[wanted];
+    if *x == Value::Null {
+        return Err(format!("Value {} is null in `.vshrc.json`!", wanted));
+    }
+        let val0 = x[0].to_string()
+                .replace("\"", "")
+                .parse::<u8>().map_err(|_| format!("Value {} is not parseable!", x[0].to_string()))?;
+        let val1 = x[1].to_string()
+                .replace("\"", "")
+                .parse::<u8>().map_err(|_| format!("Value {} is not parseable!", x[1].to_string()))?;
+        let val2 = x[2].to_string()
+                .replace("\"", "")
+                .parse::<u8>().map_err(|_| format!("Value {} is not parseable!", x[2].to_string()))?;
+        Ok((val0, val1, val2))
+}
+
 impl Prompt {
     pub fn new() -> Self {
         // Default Values
         let mut color = (109, 152, 134);
         let mut text_color = (33, 33, 33);
-        let mut promptchar = String::from("λ");
+        let mut prompt_str = String::from("λ");
+        let mut err_color = (217, 33, 33);
         let mut double = false;
         let rt = Self::Classic {
-            promptchar: promptchar.clone(),
+            promptchar: prompt_str.clone(),
             double,
         };
 
         if let Ok(y) = Prompt::raw_json() {
-            let x = &y["color"];
-            if *x != Value::Null {
-                color = (
-                    x[0].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
-                    x[1].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
-                    x[2].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
-                );
+            if let Ok(val) = get_triple_val(&y, "color") {
+                color = val;
             }
-        }
-
-        if let Ok(y) = Prompt::raw_json() {
-            let x = &y["text_color"];
-            if *x != Value::Null {
-                text_color = (
-                    x[0].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
-                    x[1].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
-                    x[2].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
-                );
+            if let Ok(val) = get_triple_val(&y, "text_color") {
+                text_color = val;
+            }
+            if let Ok(val) = get_triple_val(&y, "err_color") {
+                err_color = val;
             }
         }
 
         if let Some(x) = Prompt::json_value("double") {
-            if x.to_uppercase().as_str() == "\"TRUE\"" {
-                double = true;
-            } else if x.to_uppercase().as_str() == "\"FALSE\"" {
-                double = false;
-            }
+            double = x.parse::<bool>().unwrap_or(false)
         }
 
         if let Some(x) = Prompt::json_value("character") {
-            promptchar = x;
+            prompt_str = x;
         }
 
+        // TODO: Changeable PS1/theme
         if let Some(x) = Prompt::json_value("style") {
             match x.to_uppercase().as_str() {
                 "\"MODERN\"" => Self::Modern {
-                    promptchar,
+                    prompt: prompt_str,
                     color,
                     text_color,
+                    err_color,
                     double,
                 },
-                "\"CLASSIC\"" => Self::Classic { promptchar, double },
+                "\"CLASSIC\"" => Self::Classic { promptchar: prompt_str, double },
                 x => {
                     eprintln!(
                         "vsh: Error Parsing `.vshrc.json`\nNo such theme as \"{}\"",
                         x
                     );
-                    Self::Classic { promptchar, double }
+                    Self::Classic { promptchar: prompt_str, double }
                 }
             }
         } else {
@@ -132,7 +121,7 @@ impl Prompt {
         }
     }
 
-    pub fn generate_prompt(&self) -> String {
+    pub fn generate_prompt(&self, last_proc_num: i32) -> String {
         let current_dir = std::env::current_dir()
             .unwrap()
             .into_os_string()
@@ -140,9 +129,10 @@ impl Prompt {
             .unwrap(); // Won't panic
         match self {
             Self::Modern {
-                promptchar,
+                prompt: promptchar,
                 color,
                 text_color,
+                err_color,
                 double,
             } => {
                 let backarrow = "".truecolor(color.0, color.1, color.2);
@@ -155,10 +145,21 @@ impl Prompt {
                     .replace("\"", "")
                     .truecolor(color.0, color.1, color.2);
 
+                let err_msg = format!("[{}]", last_proc_num)
+                    .truecolor(err_color.0, err_color.1, err_color.2).bold();
+
                 if *double {
-                    format!("{}{}{}\n{} ", backarrow, directory, forwardarrow, pr_char)
+                    if last_proc_num != 0 {
+                        format!("{}{}{} {}\n{} ", backarrow, directory, forwardarrow, err_msg, pr_char)
+                    } else {
+                        format!("{}{}{}\n{} ", backarrow, directory, forwardarrow, pr_char)
+                    }
                 } else {
-                    format!("{}{} ", directory, forwardarrow)
+                    if last_proc_num != 0 {
+                        format!("{}{} {} ", directory, forwardarrow, err_msg)
+                    } else {
+                        format!("{}{} ", directory, forwardarrow)
+                    }
                 }
             }
             Self::Classic { promptchar, double } => {

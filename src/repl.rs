@@ -3,8 +3,8 @@ use std::fs::File;
 use std::io;
 use std::process;
 
-use crate::eval::{CommandError, Internalcommand};
-use crate::prompt::Prompt;
+use crate::eval::InternalCommand;
+use crate::{eval::CommandError, prompt::Prompt};
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
@@ -16,7 +16,7 @@ impl Repl {
         Self {}
     }
 
-    pub fn start_shell(&mut self) -> io::Result<()> {
+    pub fn start_shell(&mut self) -> io::Result<i32> {
         let mut rl = Editor::<()>::new();
         let home_dir = env::var("HOME").unwrap(); // There should be a HOME dir so no need to worry about this unwrap
 
@@ -27,22 +27,54 @@ impl Repl {
             eprintln!("No previous history.");
             File::create(format!("{}/.vsh_history", home_dir)).expect("Can't create history File!");
         }
-        let prompt = Prompt::new().generate_prompt();
+
+        let prompt = Prompt::new();
+
+        // TODO: Integrate with prompt
+        let mut last_return_val = 0;
 
         loop {
-            let readline = rl.readline(prompt.as_str());
+            let readline = rl.readline(&prompt.generate_prompt(last_return_val));
 
             match readline {
                 Ok(x) => {
                     rl.add_history_entry(x.as_str());
-                    if let Err(e) = Self::run(x) {
-                        match e {
-                            CommandError::Exit => {
-                                rl.save_history(&format!("{}/.vsh_history", home_dir))
-                                    .expect("Couldn't Save History");
-                                process::exit(0);
+                    match InternalCommand::new(x) {
+                        Err(e) => {
+                            match e {
+                                CommandError::Error(s) => {
+                                    if let Some(msg) = s {
+                                        eprintln!("{}", msg);
+                                    }
+                                    last_return_val = 127;
+                                }
+                                _ => continue, // TODO: What should happen if an error is returned?
                             }
-                            _ => continue, // TODO: What should happen if an error is returned?
+                        },
+                        Ok(mut com) => {
+                            match com.call() {
+                                Ok(ret_code) => {
+                                    last_return_val = ret_code;
+                                },
+                                Err(e) => {
+                                    match e {
+                                        CommandError::Error(msg) => {
+                                            if let Some(st) = msg {
+                                                eprintln!("{}", st);
+                                                last_return_val = 1;
+                                            }
+                                        },
+                                        CommandError::Exit(code) => {
+                                            rl.save_history(&format!("{}/.vsh_history", home_dir))
+                                                .expect("Couldn't Save History");
+                                            return Ok(code.unwrap_or(0))
+                                        },
+                                        CommandError::Terminated(code) => {
+                                            last_return_val = code;
+                                        },
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -56,25 +88,6 @@ impl Repl {
             rl.save_history(&format!("{}/.vsh_history", home_dir))
                 .expect("Couldn't Save History");
         }
-        Ok(())
-    }
-
-    pub fn run(x: String) -> Result<(), CommandError> {
-        let mut last_return = Ok(());
-        for com in x.split(';') {
-            last_return = Self::run_linked_commands(com.into());
-        }
-        last_return
-    }
-    fn run_command(com: String) -> Result<(), CommandError> {
-        Internalcommand::new(com).eval()
-    }
-    fn run_linked_commands(commands: String) -> Result<(), CommandError> {
-        for linked_com in commands.split("&&") {
-            if let Err(e) = Self::run_command(linked_com.to_string()) {
-                return Err(e);
-            }
-        }
-        Ok(())
+        Ok(0)
     }
 }
