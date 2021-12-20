@@ -5,6 +5,12 @@ A Blazingly fast shell made in Rust 🦀
 
 </div>
 
+## IMPORTANT
+Until Jan 10 any major commits won't be there as I will be having my exams and probably won't be able to find the time to sit down and implement new features. 
+
+I will be doing minor commits like bugfixes, responding to issues and reviewing PRs so no need to worry about the project going cold. 
+Although after 10 Jan I plan to make a new repo containing `vsh` scripting language's parser.
+
 ## Installation
 
 Copy and paste the following command and choose the appropriate installtion method for you. You can remove the `install.py` file afterwards
@@ -100,3 +106,5 @@ As you can see customizing is not that hard and doesn't require too much code. I
 Licensed under a Mozilla Public License.
 
 For more information take a look at the license [here](./LICENSE).
+
+
