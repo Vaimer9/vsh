@@ -21,7 +21,9 @@ fn fetch_data() -> String {
     if path.exists() {
         match File::open(&path) {
             Ok(mut x) => {
-                x.read_to_string(&mut data).unwrap();
+                if let Err(_) = x.read_to_string(&mut data) {
+                    eprintln!("vsh: `.vshrc.json` is not in UTF-8 encoding and cannot be read.")
+                }
             }
             Err(_) => {
                 eprintln!("vsh: Error Occured while opening `.vshrc.json`");
@@ -30,7 +32,9 @@ fn fetch_data() -> String {
     } else {
         match File::create(&path) {
             Ok(mut x) => {
-                x.write_all(BASE_JSON.as_bytes()).unwrap();
+                if let Err(_) = x.write_all(BASE_JSON.as_bytes()) {
+                    eprintln!("Could not write to {:?}!", path);
+                }
                 data = String::from(BASE_JSON);
             }
             Err(_) => eprintln!("Config File could not be created!"),

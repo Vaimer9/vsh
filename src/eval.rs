@@ -207,8 +207,10 @@ impl CommandStructure {
                             Err(_) => Err(CommandError::Error(Some("No such directory!"))),
                         }
                     } else {
-                        env::set_current_dir(env::var("HOME").unwrap()).unwrap();
-                        Ok(0)
+                        if let Err(_) = env::set_current_dir(env::var("HOME").unwrap()) {
+                                eprintln!("vsh: could not enter home directory")
+                        }
+                        Ok(1)
                     }
                 }
                 Instruction::Normal { command, args } => {

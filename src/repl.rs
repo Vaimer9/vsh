@@ -24,7 +24,9 @@ impl Repl {
             .is_err()
         {
             eprintln!("No previous history.");
-            File::create(format!("{}/.vsh_history", home_dir)).expect("Can't create history File!");
+            if let Err(_) = File::create(format!("{}/.vsh_history", home_dir)) {
+                eprintln!("Could not create history file!");
+            }
         }
 
         let prompt = Prompt::new();
@@ -62,8 +64,9 @@ impl Repl {
                                     }
                                 }
                                 CommandError::Exit(code) => {
-                                    rl.save_history(&format!("{}/.vsh_history", home_dir))
-                                        .expect("Couldn't Save History");
+                                    if let Err(_) = rl.save_history(&format!("{}/.vsh_history", home_dir)) {
+                                        eprintln!("vsh: could not save command history!")
+                                    }
                                     return Ok(code.unwrap_or(0));
                                 }
                             },
@@ -77,8 +80,9 @@ impl Repl {
                     break;
                 }
             }
-            rl.save_history(&format!("{}/.vsh_history", home_dir))
-                .expect("Couldn't Save History");
+            if let Err(_) = rl.save_history(&format!("{}/.vsh_history", home_dir)) {
+                eprintln!("vsh: could not save command history!")
+            }
         }
         Ok(0)
     }
