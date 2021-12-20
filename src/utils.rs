@@ -33,11 +33,11 @@ fn fetch_data() -> String {
         match File::create(&path) {
             Ok(mut x) => {
                 if let Err(_) = x.write_all(BASE_JSON.as_bytes()) {
-                    eprintln!("Could not write to {:?}!", path);
+                    eprintln!("vsh: could not write to {:?}!", path);
                 }
                 data = String::from(BASE_JSON);
             }
-            Err(_) => eprintln!("Config File could not be created!"),
+            Err(_) => eprintln!("vsh: config File could not be created!"),
         }
     }
     data

@@ -23,9 +23,9 @@ impl Repl {
             .load_history(&format!("{}/.vsh_history", home_dir))
             .is_err()
         {
-            eprintln!("No previous history.");
+            eprintln!("vsh: no previous history.");
             if let Err(_) = File::create(format!("{}/.vsh_history", home_dir)) {
-                eprintln!("Could not create history file!");
+                eprintln!("vsh: could not create history file!");
             }
         }
 
@@ -76,7 +76,7 @@ impl Repl {
                 Err(ReadlineError::Interrupted) => println!(),
                 Err(ReadlineError::Eof) => break,
                 Err(err) => {
-                    println!("Error: {:?}", err);
+                    println!("vsh: an error has occurred: {:?}\n\nPlease report this in https://github.com/xmantle/vsh/issues!", err);
                     break;
                 }
             }
