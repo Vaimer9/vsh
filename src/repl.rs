@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 use std::env;
 use std::fs::File;
 use std::io;
@@ -66,9 +72,15 @@ impl Repl {
         }
         last_return
     }
+
     fn run_command(com: String) -> Result<(), CommandError> {
+        if com.as_str().contains("|") {
+            let split = com.split("|").peekable();
+
+        }
         Internalcommand::new(com).eval()
     }
+
     fn run_linked_commands(commands: String) -> Result<(), CommandError> {
         for linked_com in commands.split("&&") {
             if let Err(e) = Self::run_command(linked_com.to_string()) {
