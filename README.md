@@ -1,7 +1,7 @@
 <div align="center">
 
 # vsh
-A Blazingly fast shell made in Rust 🦀
+A blazingly fast shell made in Rust 🦀
 
 </div>
 
@@ -13,7 +13,7 @@ Although after 10 Jan I plan to make a new repo containing `vsh` scripting langu
 
 ## Installation
 
-Copy and paste the following command and choose the appropriate installtion method for you. You can remove the `install.py` file afterwards
+Copy and paste the following command and choose the appropriate installation method for you. You can remove the `install.py` file afterwards
 ```sh
 wget https://raw.githubusercontent.com/Vaimer9/vsh/main/install.py
 python3 install.py
@@ -22,13 +22,13 @@ python3 install.py
 
 ### Why make another shell?
 
-[Nushell](https://github.com/nushell/nushell/) which is the current leading rust shell, is very opinionated. It brings a lot to the table for someone who just wants a shell but in rust. Namely, a new `ls` command, new scripting experiece etc. What is missing is just bash written in rust and vsh is here to deliver that. The planned scripting language will be a interchangable with bash and all of its features so that people don't feel *homesick* or dropped into a new space when they start using vsh. As the for shell prompt I plan to expand upon it to add plugins to accept a wide array of custom plugins all written in vsh. Till then feel free to contribute yourself!
+[Nushell](https://github.com/nushell/nushell/) which is the current leading rust shell, is very opinionated. It brings a lot to the table for someone who just wants a shell but in rust. Namely, a new `ls` command, new scripting experience etc. What is missing is just bash written in rust and vsh is here to deliver that. The planned scripting language will be a interchangable with bash and all of its features so that people don't feel *homesick* or dropped into a new space when they start using vsh. As the for shell prompt I plan to expand upon it to add plugins to accept a wide array of custom plugins all written in vsh. Till then feel free to contribute yourself!
 
 ## Customization
 
 To customize your prompt you have to edit the `.vshrc.json` file in your home directory.
 The file is created when you first open `vsh`.
-When initialized the file contains an emtpy json object, i.e:
+When initialized the file contains an empty json object, i.e:
 ```
 {
 
@@ -40,7 +40,7 @@ There are two themes with the following properties
 - Modern: `double: boolean value`, `character: string value`, `color: List with 3 elements`, `text_color: List with 3 elements`
 
 ### Double
-**defualt value:** `False` 
+**default value:** `False` 
 
 Determines wether the prompt will be double lined or single lined
 eg:
