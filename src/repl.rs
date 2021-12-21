@@ -74,10 +74,6 @@ impl Repl {
     }
 
     fn run_command(com: String) -> Result<(), CommandError> {
-        if com.as_str().contains("|") {
-            let split = com.split("|").peekable();
-
-        }
         Internalcommand::new(com).eval()
     }
 
