@@ -32,7 +32,7 @@ class Release:
     num: str
     message: str
 
-def find_releases() -> list[Release]:
+def find_releases():
     page = requests.get("https://github.com/Vaimer9/vsh/releases")
     soup = BeautifulSoup(page.content, 'html.parser')
     to_return = []
@@ -43,7 +43,7 @@ def find_releases() -> list[Release]:
     return to_return
 
 
-def get_version(releases: Optional[list[Release]]):
+def get_version(releases):
     print("Which version do you want to install?")
     print("Example: vX.X.XX")
     print("`l` for latest")
@@ -78,7 +78,7 @@ def check_for_rustc():
             continue
 
 def install_default_config_file():
-    input("Do you want to automatically install the default configuration file?: (y, n)")
+    print("Do you want to automatically install the default configuration file?: (y, n)")
     while True:
         x = input("> ")
         if x.lower() == "y":
@@ -107,6 +107,7 @@ def main():
         print("Installing binary in current Directory")
         if x == "l":
             os.system("wget https://github.com/Vaimer9/vsh/releases/latest/download/vsh")
+            os.system("chmod +x vsh")
         else:
             ret_val = os.system(f'wget https://github.com/Vaimer9/vsh/releases/download/{x}/vsh')
             if ret_val != 0:
