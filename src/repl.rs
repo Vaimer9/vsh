@@ -30,12 +30,14 @@ impl Repl {
             .load_history(&format!("{}/.vsh_history", home_dir))
             .is_err()
         {
-            eprintln!("No previous history.");
-            File::create(format!("{}/.vsh_history", home_dir)).expect("Can't create history File!");
+            eprintln!("vsh: No previous history.");
+            if let Err(_) = File::create(format!("{}/.vsh_history", home_dir)) {
+                eprintln!("vsh: Could not create history file!");
+            }
         }
-        let prompt = Prompt::new().generate_prompt();
 
         loop {
+            let prompt = Prompt::new().generate_prompt();
             let readline = rl.readline(prompt.as_str());
 
             match readline {
@@ -44,8 +46,9 @@ impl Repl {
                     if let Err(e) = Self::run(x) {
                         match e {
                             CommandError::Exit => {
-                                rl.save_history(&format!("{}/.vsh_history", home_dir))
-                                    .expect("Couldn't Save History");
+                                if let Err(_) = rl.save_history(&format!("{}/.vsh_history", home_dir)) {
+                                    eprintln!("vsh: Could not save command history");
+                                }
                                 process::exit(0);
                             }
                             _ => continue, // TODO: What should happen if an error is returned?
@@ -55,12 +58,13 @@ impl Repl {
                 Err(ReadlineError::Interrupted) => println!(),
                 Err(ReadlineError::Eof) => break,
                 Err(err) => {
-                    println!("Error: {:?}", err);
+                    println!("vsh: An error has occured, please report the error on: https://github.com/xmantle/vsh/issues \n{:?}", err);
                     break;
                 }
             }
-            rl.save_history(&format!("{}/.vsh_history", home_dir))
-                .expect("Couldn't Save History");
+            if let Err(_) = rl.save_history(&format!("{}/.vsh_history", home_dir)) {
+                eprintln!("vsh: Could not save command history");
+            }
         }
         Ok(())
     }

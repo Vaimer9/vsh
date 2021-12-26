@@ -17,8 +17,11 @@ pub fn cd(arg: Option<&String>) {
             Ok(_) => (),
             Err(_) => eprintln!("No such directory"),
         },
-        None => env::set_current_dir(env::var("HOME").unwrap())
-            .expect("Could not go to home directory!"), // HOME will always be set
+        None => {
+            if let Err(_) = env::set_current_dir(env::var("Home").unwrap()/* Unwrap free, $HOME is always set*/) {
+                eprintln!("Could not enter Home directory");
+            }
+        }
     }
 }
 

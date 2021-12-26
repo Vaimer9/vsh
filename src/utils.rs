@@ -23,19 +23,24 @@ pub fn fetch_data() -> String {
     if path.exists() {
         match File::open(&path) {
             Ok(mut x) => {
-                x.read_to_string(&mut data).unwrap();
+                if let Err(_) = x.read_to_string(&mut data) {
+                    eprintln!("vsh: config file is not in UTF-8 encoding and cannot be read");
+                }
             }
             Err(_) => {
-                eprintln!("vsh: Error Occured while opening `.vshrc.json`");
+                eprintln!("vsh: Error Occured while opening config file");
             }
         }
     } else {
         match File::create(&path) {
             Ok(mut x) => {
                 x.write_all(BASE_JSON.as_bytes()).unwrap();
+                if let Err(_) = x.write_all(BASE_JSON.as_bytes()) {
+                    eprintln!("vsh: Could not write to config file")
+                }
                 data = String::from(BASE_JSON);
             }
-            Err(_) => eprintln!("Config File could not be created!"),
+            Err(_) => eprintln!("vsh: Config File could not be created!"),
         }
     }
     data
