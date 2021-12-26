@@ -18,8 +18,20 @@ pub fn cd(arg: Option<&String>) {
             Err(_) => eprintln!("No such directory"),
         },
         None => {
-            if let Err(_) = env::set_current_dir(env::var("Home").unwrap()/* Unwrap free, $HOME is always set*/) {
+            if let Err(_) = env::set_current_dir(env::var("HOME").unwrap()/* Unwrap free, $HOME is always set*/) {
                 eprintln!("Could not enter Home directory");
+            }
+        }
+    }
+}
+
+pub fn ls(args: Option<&String>) {
+    match arg {
+        None => {
+            for x in fs::read_dir(".").unwrap() {
+                let x = x.unwrap();
+
+
             }
         }
     }
@@ -43,7 +55,7 @@ pub fn neutral(x: String, y: Vec<String>) -> Result<(), CommandError> {
                 }
             } else {
                 // This is the case in which the command could not be run
-                eprintln!("Command could not be executed");
+                eprintln!("vsh: Command could not be executed");
                 Err(CommandError::Error)
             }
         }
