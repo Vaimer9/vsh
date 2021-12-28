@@ -51,18 +51,19 @@ impl Repl {
                                 }
                                 process::exit(0);
                             }
-                            _ => (), // TODO: What should happen if an error is returned?
+                            CommandError::Error(x) => eprintln!("vsh: {}", x),
+                            CommandError::Terminated(_) => continue,
                         }
                     }
                 }
                 Err(ReadlineError::Interrupted) => println!(),
                 Err(ReadlineError::Eof) => break,
                 Err(err) => {
-                    println!("vsh: An error has occured, please report the error on: https://github.com/xmantle/vsh/issues \n{:?}", err);
+                    println!("vsh: Unexpected Error, please report the error on: https://github.com/xmantle/vsh/issues \n{:?}", err);
                     break;
                 }
             }
-            if let Err(_) = rl.save_history(&format!("{}/.vsh_history", home_dir)) {
+            if rl.save_history(&format!("{}/.vsh_history", home_dir)).is_err() {
                 eprintln!("vsh: Could not save command history");
             }
         }

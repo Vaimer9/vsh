@@ -23,7 +23,7 @@ pub fn fetch_data() -> String {
     if path.exists() {
         match File::open(&path) {
             Ok(mut x) => {
-                if let Err(_) = x.read_to_string(&mut data) {
+                if x.read_to_string(&mut data).is_err() {
                     eprintln!("vsh: config file is not in UTF-8 encoding and cannot be read");
                 }
             }
@@ -35,7 +35,7 @@ pub fn fetch_data() -> String {
         match File::create(&path) {
             Ok(mut x) => {
                 x.write_all(BASE_JSON.as_bytes()).unwrap();
-                if let Err(_) = x.write_all(BASE_JSON.as_bytes()) {
+                if x.write_all(BASE_JSON.as_bytes()).is_err() {
                     eprintln!("vsh: Could not write to config file")
                 }
                 data = String::from(BASE_JSON);
