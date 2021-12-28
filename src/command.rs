@@ -6,13 +6,11 @@
 
 use lazy_static::lazy_static;
 use std::env;
-use std::path::Path;
-use std::process::Command;
 
 use crate::eval::CommandError;
 
 pub trait CommandStructure {
-    fn name() ->  &'static str;
+    fn name() -> &'static str;
 
     fn about() -> &'static str;
 

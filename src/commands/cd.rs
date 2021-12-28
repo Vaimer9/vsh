@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::eval::CommandError;
 
-use crate::command::{CommandStructure, expand};
+use crate::command::{expand, CommandStructure};
 
 pub struct Cd;
 
@@ -17,11 +17,7 @@ impl CommandStructure for Cd {
     }
 
     fn examples() -> [&'static str; 3] {
-        [
-            "cd",
-            "cd ~/Downloads",
-            "cd .."
-        ]
+        ["cd", "cd ~/Downloads", "cd .."]
     }
 
     fn run(args: Vec<String>) -> Result<(), CommandError> {
@@ -29,12 +25,18 @@ impl CommandStructure for Cd {
             Some(dir) => {
                 if env::set_current_dir(Path::new(&expand(dir.to_string()))).is_err() {
                     Err(CommandError::Error("No such directory".to_string()))
-                } else { Ok(()) }
+                } else {
+                    Ok(())
+                }
             }
             None => {
                 if env::set_current_dir(env::var("HOME").unwrap()).is_err() {
-                    Err(CommandError::Error("Could not enter HOME directory".to_string()))
-                } else { Ok(()) }
+                    Err(CommandError::Error(
+                        "Could not enter HOME directory".to_string(),
+                    ))
+                } else {
+                    Ok(())
+                }
             }
         }
     }

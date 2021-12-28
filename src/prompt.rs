@@ -12,7 +12,7 @@ use serde_json::Value;
 #[derive(Debug)]
 pub enum Prompt {
     Modern {
-        promptchar: String, 
+        promptchar: String,
         color: (u8, u8, u8),
         text_color: (u8, u8, u8),
         double: bool,
@@ -25,7 +25,6 @@ pub enum Prompt {
 
 impl Prompt {
     pub fn new() -> Self {
-
         let mut color = (109, 152, 134);
         let mut text_color = (33, 33, 33);
         let mut promptchar = String::from("λ");

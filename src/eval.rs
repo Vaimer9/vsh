@@ -4,12 +4,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-use crate::commands;
 use crate::command;
 use crate::command::CommandStructure;
+use crate::commands;
 
-use std::string::ToString;
 use std::process::Command;
+use std::string::ToString;
 
 pub struct Internalcommand {
     keyword: String,
@@ -42,39 +42,35 @@ impl Internalcommand {
             ("", _) => {
                 println!();
                 Ok(())
-            },
-            ("exit", _) => {
-                return Err(CommandError::Exit); 
             }
-            (x, y) => {
-                match *x.as_bytes().last().unwrap() as char {
-                    '/' => commands::cd::Cd::run(vec![x.to_string()]),
-                    _ => {
-                        let args = y.into_iter().map(command::expand).collect::<Vec<_>>();
-                        match Command::new(&x).args(args).spawn() {
-                            Ok(mut ok) => {
-                                if let Ok(status) = ok.wait() {
-                                    match status.code() {
-                                        Some(code) => {
-                                            if code > 0 {
-                                                Err(CommandError::Finished(code))
-                                            } else {
-                                                Ok(())
-                                            }
+            ("exit", _) => Err(CommandError::Exit),
+            (x, y) => match *x.as_bytes().last().unwrap() as char {
+                '/' => commands::cd::Cd::run(vec![x.to_string()]),
+                _ => {
+                    let args = y.into_iter().map(command::expand).collect::<Vec<_>>();
+                    match Command::new(&x).args(args).spawn() {
+                        Ok(mut ok) => {
+                            if let Ok(status) = ok.wait() {
+                                match status.code() {
+                                    Some(code) => {
+                                        if code > 0 {
+                                            Err(CommandError::Finished(code))
+                                        } else {
+                                            Ok(())
                                         }
-                                        None => Err(CommandError::Terminated(127)), 
                                     }
-                                } else {
-                                    Err(CommandError::Error("Command could not be executed".to_string()))
+                                    None => Err(CommandError::Terminated(127)),
                                 }
-                            }
-                            Err(_) => {
-                                Err(CommandError::Error(format!("No such command as `{}`", x)))
+                            } else {
+                                Err(CommandError::Error(
+                                    "Command could not be executed".to_string(),
+                                ))
                             }
                         }
+                        Err(_) => Err(CommandError::Error(format!("No such command as `{}`", x))),
                     }
                 }
-            }
+            },
         }
     }
 }

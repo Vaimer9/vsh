@@ -31,7 +31,7 @@ impl Repl {
             .is_err()
         {
             eprintln!("vsh: No previous history.");
-            if let Err(_) = File::create(format!("{}/.vsh_history", home_dir)) {
+            if File::create(format!("{}/.vsh_history", home_dir)).is_err() {
                 eprintln!("vsh: Could not create history file!");
             }
         }
@@ -46,14 +46,17 @@ impl Repl {
                     if let Err(e) = Self::run(x) {
                         match e {
                             CommandError::Exit => {
-                                if let Err(_) = rl.save_history(&format!("{}/.vsh_history", home_dir)) {
+                                if rl
+                                    .save_history(&format!("{}/.vsh_history", home_dir))
+                                    .is_err()
+                                {
                                     eprintln!("vsh: Could not save command history");
                                 }
                                 process::exit(0);
                             }
                             CommandError::Error(x) => eprintln!("vsh: {}", x),
                             CommandError::Terminated(_) => continue,
-                            CommandError::Finished(_) => continue
+                            CommandError::Finished(_) => continue,
                         }
                     }
                 }
@@ -64,7 +67,10 @@ impl Repl {
                     break;
                 }
             }
-            if rl.save_history(&format!("{}/.vsh_history", home_dir)).is_err() {
+            if rl
+                .save_history(&format!("{}/.vsh_history", home_dir))
+                .is_err()
+            {
                 eprintln!("vsh: Could not save command history");
             }
         }
