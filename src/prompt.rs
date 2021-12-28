@@ -12,20 +12,20 @@ use serde_json::Value;
 #[derive(Debug)]
 pub enum Prompt {
     Modern {
-        promptchar: String, // prompt charecter, the reason that It is a String is because I want the user to also have prompts such as `->` or `--# `
-        color: (u8, u8, u8), // Background color
+        promptchar: String, 
+        color: (u8, u8, u8),
         text_color: (u8, u8, u8),
-        double: bool, // double line
+        double: bool,
     },
     Classic {
-        promptchar: String, // prompt charecter
-        double: bool,       // double line
+        promptchar: String,
+        double: bool,
     },
 }
 
 impl Prompt {
     pub fn new() -> Self {
-        // Default Values
+
         let mut color = (109, 152, 134);
         let mut text_color = (33, 33, 33);
         let mut promptchar = String::from("λ");

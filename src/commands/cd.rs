@@ -8,15 +8,15 @@ use crate::command::{CommandStructure, expand};
 pub struct Cd;
 
 impl CommandStructure for Cd {
-    fn name() {
+    fn name() -> &'static str {
         "cd"
     }
 
-    fn about() {
+    fn about() -> &'static str {
         "A command line program for changing working directory"
     }
 
-    fn examples() {
+    fn examples() -> [&'static str; 3] {
         [
             "cd",
             "cd ~/Downloads",
@@ -28,12 +28,12 @@ impl CommandStructure for Cd {
         match args.get(0) {
             Some(dir) => {
                 if env::set_current_dir(Path::new(&expand(dir.to_string()))).is_err() {
-                    CommandError::Error("No such directory".to_string())
+                    Err(CommandError::Error("No such directory".to_string()))
                 } else { Ok(()) }
             }
             None => {
                 if env::set_current_dir(env::var("HOME").unwrap()).is_err() {
-                    CommandError::Error("Could not enter HOME directory")
+                    Err(CommandError::Error("Could not enter HOME directory".to_string()))
                 } else { Ok(()) }
             }
         }

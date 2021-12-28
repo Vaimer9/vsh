@@ -53,6 +53,7 @@ impl Repl {
                             }
                             CommandError::Error(x) => eprintln!("vsh: {}", x),
                             CommandError::Terminated(_) => continue,
+                            CommandError::Finished(_) => continue
                         }
                     }
                 }
