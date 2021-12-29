@@ -3,11 +3,11 @@ use std::path::Path;
 
 use crate::eval::CommandError;
 
-use crate::command::{expand, CommandStructure};
+use crate::command::{expand, Builtin};
 
 pub struct Cd;
 
-impl CommandStructure for Cd {
+impl Builtin for Cd {
     fn name() -> &'static str {
         "cd"
     }

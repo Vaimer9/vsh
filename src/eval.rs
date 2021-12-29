@@ -5,8 +5,8 @@
  */
 
 use crate::command;
-use crate::command::CommandStructure;
-use crate::commands;
+use crate::command::Builtin;
+use crate::builtins;
 
 use std::process::Command;
 use std::string::ToString;
@@ -38,14 +38,14 @@ impl Internalcommand {
 
     pub fn eval(&mut self) -> Result<(), CommandError> {
         match (self.keyword.as_str(), self.args.clone()) {
-            ("cd", args) => commands::cd::Cd::run(args),
+            ("cd", args) => builtins::cd::Cd::run(args),
             ("", _) => {
                 println!();
                 Ok(())
             }
             ("exit", _) => Err(CommandError::Exit),
             (x, y) => match *x.as_bytes().last().unwrap() as char {
-                '/' => commands::cd::Cd::run(vec![x.to_string()]),
+                '/' => builtins::cd::Cd::run(vec![x.to_string()]),
                 _ => {
                     let args = y.into_iter().map(command::expand).collect::<Vec<_>>();
                     match Command::new(&x).args(args).spawn() {

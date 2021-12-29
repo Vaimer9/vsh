@@ -5,7 +5,7 @@
  */
 
 mod command;
-mod commands;
+mod builtins;
 mod eval;
 mod prompt;
 mod repl;

@@ -9,7 +9,7 @@ use std::env;
 
 use crate::eval::CommandError;
 
-pub trait CommandStructure {
+pub trait Builtin {
     fn name() -> &'static str;
 
     fn about() -> &'static str;
