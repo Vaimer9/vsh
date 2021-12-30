@@ -27,7 +27,7 @@ impl Repl {
 
     pub fn start_shell(&mut self) -> io::Result<()> {
         let mut rl = Editor::<()>::new();
-        let home_dir = env::var("HOME").unwrap(); 
+        let home_dir = env::var("HOME").unwrap();
         if rl
             .load_history(&format!("{}/.vsh_history", home_dir))
             .is_err()
@@ -38,9 +38,9 @@ impl Repl {
             }
         }
 
-        let config_data = match Prompt::get_data(fetch_data()){
+        let config_data = match Prompt::get_data(fetch_data()) {
             Ok(x) => x,
-            Err(_) => Prompt::get_data(String::from("")).unwrap() // Unwrap free
+            Err(_) => Prompt::get_data(String::from("")).unwrap(), // Unwrap free
         };
 
         loop {

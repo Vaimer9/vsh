@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-use crate::utils::{fetch_data};
+use crate::utils::fetch_data;
 
 use colored::*;
 use serde_derive::Deserialize;
@@ -26,7 +26,7 @@ pub enum Prompt {
 
 #[derive(Deserialize)]
 pub struct Config {
-    prompt: Option<PromptConfig>
+    prompt: Option<PromptConfig>,
 }
 
 #[derive(Deserialize)]
@@ -35,14 +35,14 @@ pub struct PromptConfig {
     promptchar: Option<String>,
     color: Option<[u8; 3]>,
     text_color: Option<[u8; 3]>,
-    double: Option<bool>
+    double: Option<bool>,
 }
 
 impl Prompt {
     pub fn get_data(data: String) -> Result<Config, String> {
         match toml::from_str::<Config>(&data) {
             Ok(ok) => Ok(ok),
-            Err(e) => Err(e.to_string())
+            Err(e) => Err(e.to_string()),
         }
     }
 
@@ -54,24 +54,16 @@ impl Prompt {
         let rt = Self::Classic {
             promptchar: promptchar.clone(),
             text_color,
-            double
+            double,
         };
 
         if let Some(prompt) = &data.prompt {
             if let Some(x) = prompt.color {
-                color = (
-                    x[0],
-                    x[1],
-                    x[2]
-                );
+                color = (x[0], x[1], x[2]);
             }
 
             if let Some(x) = prompt.text_color {
-                text_color = (
-                    x[0],
-                    x[1],
-                    x[2]
-                );
+                text_color = (x[0], x[1], x[2]);
             }
 
             if let Some(x) = prompt.double {
@@ -88,13 +80,13 @@ impl Prompt {
                         promptchar,
                         color,
                         text_color,
-                        double
+                        double,
                     },
                     "classic" | _ => Self::Classic {
                         promptchar,
                         text_color,
-                        double
-                    }
+                        double,
+                    },
                 };
             } else {
                 return rt;
@@ -132,11 +124,23 @@ impl Prompt {
                     format!("{}{} ", directory, forwardarrow)
                 }
             }
-            Self::Classic { promptchar, double, text_color } => {
+            Self::Classic {
+                promptchar,
+                double,
+                text_color,
+            } => {
                 if *double {
-                    format!("[{}]\n{} ", current_dir.truecolor(text_color.0, text_color.1, text_color.2), promptchar)
+                    format!(
+                        "[{}]\n{} ",
+                        current_dir.truecolor(text_color.0, text_color.1, text_color.2),
+                        promptchar
+                    )
                 } else {
-                    format!("[{}]{} ", current_dir.truecolor(text_color.0, text_color.1, text_color.2), promptchar)
+                    format!(
+                        "[{}]{} ",
+                        current_dir.truecolor(text_color.0, text_color.1, text_color.2),
+                        promptchar
+                    )
                 }
             }
         }

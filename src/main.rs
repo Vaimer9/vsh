@@ -4,8 +4,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-mod command;
 mod builtins;
+mod command;
 mod eval;
 mod prompt;
 mod repl;

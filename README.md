@@ -5,11 +5,7 @@ A blazingly fast shell made in Rust 🦀
 
 </div>
 
-## IMPORTANT
-Until Jan 10 any major commits won't be there as I will be having my exams and probably won't be able to find the time to sit down and implement new features. 
-
-I will be doing minor commits like bugfixes, responding to issues and reviewing PRs so no need to worry about the project going cold. 
-Although after 10 Jan I plan to make a new repo containing `vsh` scripting language's parser.
+This is a shell made for the sophisticated power user. Far from finished yet but the main motive is to create a hyperextensible shell with all the features of previous generations added with tools geared towards improving workflows.
 
 ## Installation
 
@@ -18,68 +14,55 @@ Copy and paste the following command and choose the appropriate installation met
 wget https://raw.githubusercontent.com/Vaimer9/vsh/main/install.py
 python3 install.py
 ```
-## About
 
-### Why make another shell?
-
-[Nushell](https://github.com/nushell/nushell/) which is the current leading rust shell, is very opinionated. It brings a lot to the table for someone who just wants a shell but in rust. Namely, a new `ls` command, new scripting experience etc. What's missing is just bash written in rust and vsh is here to deliver that. The planned scripting language will be a copy of bash and all of its features so that people don't feel *homesick* or dropped into a new space when they start using vsh. As for the shell prompt, I plan to expand upon it to add plugins to accept a wide array of custom plugins all written in vsh. Till then feel free to contribute yourself!
 
 ## Customization
+Once you run vsh for the first time it automatically creates `.vshrc.toml`.
+All the customization possible is written there.
+Even then here is the text
+```toml
+# This is the config file for vsh. For now you can only edit the Prompt styling here
 
-To customize your prompt you have to edit the `.vshrc.json` file in your home directory.
-The file is created when you first open `vsh`.
-When initialized the file contains an empty json object, i.e:
+# Prompt
+# These are the default values
+# [prompt]
+
+# Whether the prompt is single-lined or double lined
+# double = false
+
+# Prompt Background
+# Highest value can be 255, anything above that will result in an error.
+# If there are mroe than 3 elements that will also result in an error
+# color = [115, 147, 179]
+
+# Prompt Text Background
+# Same as Prompt Background just that its for Text
+# text_color = [33, 33, 33]
+
+# Prompt Character
+# The reason I included this is because it gives some cusomization to Classic Prompt users
+# The character used at the start of prompt
+# Doesn't have to be a char, can also be a String
+# promptchar = "λ"
+
+# Style
+# Two option: Modern, Classic
+# Modern requires you to have nerd fonts and you can change Background color
+# Classic has the regular fonts.
+# style = "classic"
+
+
 ```
-{
 
-}
-```
-### Themes
-There are two themes with the following properties
-- Classic: `double: boolean value` and `character: string value`.
-- Modern: `double: boolean value`, `character: string value`, `color: List with 3 elements`, `text_color: List with 3 elements`
 
-### Double
-**default value:** `False` 
-
-Determines wether the prompt will be double lined or single lined
-eg:
-```json
-{
-	"double": "false"
-}
-```
-Keep in mind that you have to enter `true` or `false` as string i.e inside double quotes
-
-### Character
-**default value**: `λ`
-
-The character that you will have in the starting of the prompt.
-### Color
-**default**: `[109, 152, 134]`
-
-Determines background color of modern shell prompt. Eg:
-```json
-{
-	"color": [255, 255, 255]
-}
-```
-### Text Color
-**default**: `[33, 33, 33]`
-
-Determines text color of modern shell prompt. Eg:
-```json
-{
-	"color": [255, 255, 255]
-}
-```
 ### Example Config file
 This is the config file personally used by me:
-```json
-{
-	"style": "modern",
-	"color": [115, 147, 179]
-}
+```toml
+[prompt]
+style = "Modern"
+color = [33, 33, 33]
+text_color = [115, 147, 179]
+double = false
 ```
 As you can see customizing is not that hard and doesn't require too much code. I will be adding more and more into the level of customization possible!
 
