@@ -9,6 +9,8 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
+use crate::prompt::Config;
+
 const BASE_CONFIG: &str = r#"
 # This is the config file for vsh. For now you can only edit the Prompt styling here
 
@@ -70,4 +72,11 @@ pub fn fetch_data() -> String {
         }
     }
     data
+}
+
+pub fn get_toml(data: String) -> Result<Config, String> {
+    match toml::from_str::<Config>(&data) {
+        Ok(ok) => Ok(ok),
+        Err(e) => Err(e.to_string()),
+    }
 }

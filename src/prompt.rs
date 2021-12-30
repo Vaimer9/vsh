@@ -39,13 +39,6 @@ pub struct PromptConfig {
 }
 
 impl Prompt {
-    pub fn get_data(data: String) -> Result<Config, String> {
-        match toml::from_str::<Config>(&data) {
-            Ok(ok) => Ok(ok),
-            Err(e) => Err(e.to_string()),
-        }
-    }
-
     pub fn new(data: &Config) -> Self {
         let mut color = (115, 147, 179);
         let mut text_color = (255, 255, 255);

@@ -13,7 +13,7 @@ use std::process;
 
 use crate::eval::{CommandError, Internalcommand};
 use crate::prompt::Prompt;
-use crate::utils::fetch_data;
+use crate::utils::{fetch_data, get_toml};
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
@@ -38,11 +38,11 @@ impl Repl {
             }
         }
 
-        let config_data = match Prompt::get_data(fetch_data()) {
+        let config_data = match get_toml(fetch_data()) {
             Ok(x) => x,
             Err(err) => {
                 println!("{:?}", err);
-                Prompt::get_data(String::from("")).unwrap() // Unwrap free
+                get_toml(String::from("")).unwrap() // Unwrap free
             }
         };
 
