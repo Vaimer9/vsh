@@ -4,10 +4,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-use crate::utils::{fetch_data, BASE_JSON};
+use crate::utils::{fetch_data};
 
 use colored::*;
-use serde_json::Value;
+use serde_derive::Deserialize;
 
 #[derive(Debug)]
 pub enum Prompt {
@@ -19,122 +19,88 @@ pub enum Prompt {
     },
     Classic {
         promptchar: String,
+        text_color: (u8, u8, u8),
         double: bool,
     },
 }
 
+#[derive(Deserialize)]
+pub struct Config {
+    prompt: Option<PromptConfig>
+}
+
+#[derive(Deserialize)]
+pub struct PromptConfig {
+    style: Option<String>,
+    promptchar: Option<String>,
+    color: Option<[u8; 3]>,
+    text_color: Option<[u8; 3]>,
+    double: Option<bool>
+}
+
 impl Prompt {
-    pub fn new() -> Self {
-        let mut color = (109, 152, 134);
-        let mut text_color = (33, 33, 33);
+    pub fn get_data(data: String) -> Result<Config, String> {
+        match toml::from_str::<Config>(&data) {
+            Ok(ok) => Ok(ok),
+            Err(e) => Err(e.to_string())
+        }
+    }
+
+    pub fn new(data: &Config) -> Self {
+        let mut color = (115, 147, 179);
+        let mut text_color = (255, 255, 255);
         let mut promptchar = String::from("λ");
         let mut double = false;
         let rt = Self::Classic {
             promptchar: promptchar.clone(),
-            double,
+            text_color,
+            double
         };
 
-        if let Ok(y) = Prompt::raw_json() {
-            let x = &y["color"];
-            if *x != Value::Null {
+        if let Some(prompt) = &data.prompt {
+            if let Some(x) = prompt.color {
                 color = (
-                    x[0].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
-                    x[1].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
-                    x[2].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
+                    x[0],
+                    x[1],
+                    x[2]
                 );
             }
-        }
 
-        if let Ok(y) = Prompt::raw_json() {
-            let x = &y["text_color"];
-            if *x != Value::Null {
+            if let Some(x) = prompt.text_color {
                 text_color = (
-                    x[0].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
-                    x[1].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
-                    x[2].to_string()
-                        .replace("\"", "")
-                        .parse::<u8>()
-                        .expect("Parsing error in `.vsh.json`"),
+                    x[0],
+                    x[1],
+                    x[2]
                 );
             }
-        }
 
-        if let Some(x) = Prompt::json_value("double") {
-            if x.to_uppercase().as_str() == "\"TRUE\"" {
-                double = true;
-            } else if x.to_uppercase().as_str() == "\"FALSE\"" {
-                double = false;
+            if let Some(x) = prompt.double {
+                double = x;
+            }
+
+            if let Some(x) = &prompt.promptchar {
+                promptchar = x.clone();
+            }
+
+            if let Some(x) = &prompt.style {
+                return match x.to_lowercase().as_str() {
+                    "modern" => Self::Modern {
+                        promptchar,
+                        color,
+                        text_color,
+                        double
+                    },
+                    "classic" | _ => Self::Classic {
+                        promptchar,
+                        text_color,
+                        double
+                    }
+                };
+            } else {
+                return rt;
             }
         }
-
-        if let Some(x) = Prompt::json_value("character") {
-            promptchar = x;
-        }
-
-        if let Some(x) = Prompt::json_value("style") {
-            match x.to_uppercase().as_str() {
-                "\"MODERN\"" => Self::Modern {
-                    promptchar,
-                    color,
-                    text_color,
-                    double,
-                },
-                "\"CLASSIC\"" => Self::Classic { promptchar, double },
-                x => {
-                    eprintln!(
-                        "vsh: Error Parsing `.vshrc.json`\nNo such theme as \"{}\"",
-                        x
-                    );
-                    Self::Classic { promptchar, double }
-                }
-            }
-        } else {
-            rt
-        }
-    }
-
-    fn json_value(name: &str) -> Option<String> {
-        let data = fetch_data();
-
-        match serde_json::from_str::<Value>(&data) {
-            Ok(v) => {
-                if Value::Null == v[name] {
-                    None
-                } else {
-                    Some(v[name].to_string())
-                }
-            }
-            Err(e) => {
-                eprintln!("vsh: Error parsing data\n{}", e);
-                Some(String::from("{}"))
-            }
-        }
-    }
-
-    fn raw_json() -> std::io::Result<Value> {
-        let data = fetch_data();
-        match serde_json::from_str(&data) {
-            Ok(a) => Ok(a),
-            Err(x) => {
-                eprintln!("vsh: Error parsing data\n{}", x);
-                Ok(serde_json::Value::String(BASE_JSON.to_string()))
-            }
-        }
+        rt
     }
 
     pub fn generate_prompt(&self) -> String {
@@ -142,7 +108,7 @@ impl Prompt {
             .unwrap()
             .into_os_string()
             .into_string()
-            .unwrap(); // Won't panic
+            .unwrap();
         match self {
             Self::Modern {
                 promptchar,
@@ -166,11 +132,11 @@ impl Prompt {
                     format!("{}{} ", directory, forwardarrow)
                 }
             }
-            Self::Classic { promptchar, double } => {
+            Self::Classic { promptchar, double, text_color } => {
                 if *double {
-                    format!("[{}]\n{} ", current_dir, promptchar)
+                    format!("[{}]\n{} ", current_dir.truecolor(text_color.0, text_color.1, text_color.2), promptchar)
                 } else {
-                    format!("[{}]{} ", current_dir, promptchar)
+                    format!("[{}]{} ", current_dir.truecolor(text_color.0, text_color.1, text_color.2), promptchar)
                 }
             }
         }

@@ -4,6 +4,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#![warn(unreachable_code)]
+
 use std::env;
 use std::fs::File;
 use std::io;
@@ -11,11 +13,12 @@ use std::process;
 
 use crate::eval::{CommandError, Internalcommand};
 use crate::prompt::Prompt;
+use crate::utils::fetch_data;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-pub struct Repl {}
+pub struct Repl;
 
 impl Repl {
     pub fn new() -> Self {
@@ -24,8 +27,7 @@ impl Repl {
 
     pub fn start_shell(&mut self) -> io::Result<()> {
         let mut rl = Editor::<()>::new();
-        let home_dir = env::var("HOME").unwrap(); // There should be a HOME dir so no need to worry about this unwrap
-
+        let home_dir = env::var("HOME").unwrap(); 
         if rl
             .load_history(&format!("{}/.vsh_history", home_dir))
             .is_err()
@@ -36,8 +38,13 @@ impl Repl {
             }
         }
 
+        let config_data = match Prompt::get_data(fetch_data()){
+            Ok(x) => x,
+            Err(_) => Prompt::get_data(String::from("")).unwrap() // Unwrap free
+        };
+
         loop {
-            let prompt = Prompt::new().generate_prompt();
+            let prompt = Prompt::new(&config_data).generate_prompt();
             let readline = rl.readline(prompt.as_str());
 
             match readline {
