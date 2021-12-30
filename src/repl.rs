@@ -40,7 +40,10 @@ impl Repl {
 
         let config_data = match Prompt::get_data(fetch_data()) {
             Ok(x) => x,
-            Err(_) => Prompt::get_data(String::from("")).unwrap(), // Unwrap free
+            Err(err) => {
+                println!("{:?}", err);
+                Prompt::get_data(String::from("")).unwrap() // Unwrap free
+            }
         };
 
         loop {
