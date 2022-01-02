@@ -4,10 +4,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-use crate::utils::fetch_data;
-
 use colored::*;
 use serde_derive::Deserialize;
+
+use crate::utils::Config;
 
 #[derive(Debug)]
 pub enum Prompt {
@@ -22,11 +22,6 @@ pub enum Prompt {
         text_color: (u8, u8, u8),
         double: bool,
     },
-}
-
-#[derive(Deserialize)]
-pub struct Config {
-    prompt: Option<PromptConfig>,
 }
 
 #[derive(Deserialize)]

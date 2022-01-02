@@ -7,7 +7,9 @@
 use crate::builtins;
 use crate::command;
 use crate::command::Builtin;
+use crate::repl::Repl;
 
+use std::collections::HashMap;
 use std::process::Command;
 use std::string::ToString;
 
@@ -37,7 +39,7 @@ impl Internalcommand {
         }
     }
 
-    pub fn eval(&mut self) -> Result<(), CommandError> {
+    pub fn eval(&mut self, aliases: &HashMap<&str, &str>) -> Result<(), CommandError> {
         match (self.keyword.as_str(), self.args.clone()) {
             ("cd", args) => builtins::cd::Cd::run(args),
             ("", _) => {
@@ -49,6 +51,10 @@ impl Internalcommand {
                 '/' => builtins::cd::Cd::run(vec![x.to_string()]),
                 _ => {
                     let args = y.into_iter().map(command::expand).collect::<Vec<_>>();
+                    if let Some(alias) = &aliases.get(x) {
+                        return Repl::run(alias.to_string(), aliases);
+                    }
+
                     match Command::new(&x).args(args).spawn() {
                         Ok(mut ok) => {
                             if let Ok(status) = ok.wait() {

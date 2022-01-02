@@ -4,12 +4,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
-use crate::prompt::Config;
+use crate::prompt::PromptConfig;
+
+use serde_derive::Deserialize;
 
 const BASE_CONFIG: &str = r#"
 # This is the config file for vsh. For now you can only edit the Prompt styling here
@@ -43,6 +46,17 @@ const BASE_CONFIG: &str = r#"
 # style = "classic"
 
 "#;
+
+#[derive(Deserialize)]
+pub struct Config {
+    pub prompt: Option<PromptConfig>,
+    pub misc: Option<Misc>,
+}
+
+#[derive(Deserialize)]
+pub struct Misc {
+    pub alias: Option<Vec<[String; 2]>>,
+}
 
 pub fn fetch_data() -> String {
     let mut path = PathBuf::from(env::var("HOME").unwrap());
@@ -79,4 +93,16 @@ pub fn get_toml(data: String) -> Result<Config, String> {
         Ok(ok) => Ok(ok),
         Err(e) => Err(e.to_string()),
     }
+}
+
+pub fn get_alias(data: &Config) -> HashMap<&str, &str> {
+    let mut list: HashMap<&str, &str> = HashMap::new();
+    if let Some(misc) = &data.misc {
+        if let Some(alias) = &misc.alias {
+            for x in alias.iter() {
+                list.insert(&x[0], &x[1]);
+            }
+        }
+    }
+    list
 }

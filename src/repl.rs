@@ -6,6 +6,7 @@
 
 #![warn(unreachable_code)]
 
+use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io;
@@ -13,7 +14,7 @@ use std::process;
 
 use crate::eval::{CommandError, Internalcommand};
 use crate::prompt::Prompt;
-use crate::utils::{fetch_data, get_toml};
+use crate::utils::{fetch_data, get_alias, get_toml};
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
@@ -46,6 +47,8 @@ impl Repl {
             }
         };
 
+        let aliases = get_alias(&config_data);
+
         loop {
             let prompt = Prompt::new(&config_data).generate_prompt();
             let readline = rl.readline(prompt.as_str());
@@ -53,7 +56,8 @@ impl Repl {
             match readline {
                 Ok(x) => {
                     rl.add_history_entry(x.as_str());
-                    if let Err(e) = Self::run(x) {
+
+                    if let Err(e) = Self::run(x, &aliases) {
                         match e {
                             CommandError::Exit => {
                                 if rl
@@ -65,7 +69,9 @@ impl Repl {
                                 process::exit(0);
                             }
                             CommandError::Error(x) => eprintln!("vsh: {}", x),
-                            CommandError::Terminated(_) => continue,
+                            CommandError::Terminated(x) => {
+                                eprintln!("vsh: Process exited with code {}", x)
+                            }
                             CommandError::Finished(_) => continue,
                         }
                     }
@@ -87,21 +93,21 @@ impl Repl {
         Ok(())
     }
 
-    pub fn run(x: String) -> Result<(), CommandError> {
+    pub fn run(x: String, y: &HashMap<&str, &str>) -> Result<(), CommandError> {
         let mut last_return = Ok(());
         for com in x.split(';') {
-            last_return = Self::run_linked_commands(com.into());
+            last_return = Self::run_linked_commands(com.into(), y);
         }
         last_return
     }
 
-    fn run_command(com: String) -> Result<(), CommandError> {
-        Internalcommand::new(com).eval()
+    fn run_command(com: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
+        Internalcommand::new(com).eval(x)
     }
 
-    fn run_linked_commands(commands: String) -> Result<(), CommandError> {
+    fn run_linked_commands(commands: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
         for linked_com in commands.split("&&") {
-            if let Err(e) = Self::run_command(linked_com.to_string()) {
+            if let Err(e) = Self::run_command(linked_com.to_string(), x) {
                 return Err(e);
             }
         }

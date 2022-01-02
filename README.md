@@ -21,37 +21,18 @@ Once you run vsh for the first time it automatically creates `.vshrc.toml`.
 All the customization possible is written there.
 Even then here is the text
 ```toml
-# This is the config file for vsh. For now you can only edit the Prompt styling here
-
-# Prompt
-# These are the default values
 [prompt]
 
-# Whether the prompt is single-lined or double lined
 double = false
-
-# Prompt Background
-# Highest value can be 255, anything above that will result in an error.
-# If there are mroe than 3 elements that will also result in an error
 color = [115, 147, 179]
-
-# Prompt Text Background
-# Same as Prompt Background just that its for Text
 text_color = [33, 33, 33]
-
-# Prompt Character
-# The reason I included this is because it gives some cusomization to Classic Prompt users
-# The character used at the start of prompt
-# Doesn't have to be a char, can also be a String
 promptchar = "λ"
-
-# Style
-# Two option: Modern, Classic
-# Modern requires you to have nerd fonts and you can change Background color
-# Classic has the regular fonts.
 style = "classic"
 
-
+[misc]
+alias = [
+	["", ""]
+]
 ```
 
 
