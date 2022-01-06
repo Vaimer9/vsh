@@ -16,12 +16,13 @@ def get_input():
     print("What do you want to do?: ")
     print("1. Install Binary")
     print("2. Build Locally from main branch")
+    print("3. Update latest vsh version")
     while True:
         x = input("> ")
         try:
             val = int(x)
-            if val not in [1, 2]:
-                print("Choice must be either 1 or 2!")
+            if val not in [1, 2 , 3]:
+                print("Please enter correct Input")
                 continue
             return val
         except ValueError:
@@ -77,6 +78,22 @@ def check_for_rustc():
             print("Please enter correct value")
             continue
 
+def get_path(installed):
+    if installed:
+        print("Where have you installed vsh?")
+        print("enter `b` if  you have it in /bin directory")
+        path = input("> ")
+
+        if os.path.isfile(f"{path}") and os.path.isfile(f"{path}/vsh") is False:
+            print("That is the wrong directory!")
+        return path
+    else:
+        print("Where do you want to install the vsh binary?")
+        print("This is where is will be updated")
+        print("Enter `b` is its in /bin directory")
+        path = input("> ")
+        
+
 def install_default_config_file():
     print("Do you want to automatically install the default configuration file?: (y, n)")
     while True:
@@ -89,7 +106,6 @@ def install_default_config_file():
             print("Please enter correct value")
             continue
     os.system(f"cp ./default-config {os.environ['HOME']}/.vshrc.json")
-
 
 def main():
     print(logo)
@@ -106,14 +122,14 @@ def main():
         x = get_version(releases)
         print("Installing binary in current Directory")
         if x == "l":
-            os.system("wget https://github.com/Vaimer9/vsh/releases/latest/download/vsh")
-            os.system("chmod +x vsh")
+            os.system("wget https://github.com/Vaimer9/vsh/releases/latest/download/vsh -P /bin")
+            os.system("sudo chmod +x /bin/vsh")
         else:
-            ret_val = os.system(f'wget https://github.com/Vaimer9/vsh/releases/download/{x}/vsh')
+            ret_val = os.system(f'wget https://github.com/Vaimer9/vsh/releases/download/{x}/vsh -P /bin')
             if ret_val != 0:
-                print("Could not download vsh file!", file=sys.stderr)
+                print("Could not download vsh binary!", file=sys.stderr)
                 sys.exit(1)
-            os.system("chmod +x vsh")
+            os.system("sudo chmod +x vsh")
 
     elif x == 2:
         
@@ -127,9 +143,8 @@ def main():
         os.system("cd vsh")
         os.system("cargo build --release")
         print("The Binary is created inside target/release directory")
-
-    install_default_config_file()
-
+    elif x == 3:
+        install_default_config_file()
 
 if __name__ == '__main__':
     try:

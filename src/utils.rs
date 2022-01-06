@@ -12,8 +12,8 @@ use std::path::PathBuf;
 
 use crate::prompt::PromptConfig;
 
-use serde_derive::Deserialize;
 use lazy_static::lazy_static;
+use serde_derive::Deserialize;
 
 const BASE_CONFIG: &str = r#"
 # This is the config file for vsh. For now you can only edit the Prompt styling here
