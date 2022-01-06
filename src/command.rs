@@ -4,9 +4,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-use lazy_static::lazy_static;
-use std::env;
-
 use crate::eval::CommandError;
 
 pub trait Builtin {
@@ -28,11 +25,4 @@ pub trait Builtin {
             Self::examples()[2]
         )
     }
-}
-
-pub fn expand(raw: String) -> String {
-    lazy_static! {
-        static ref RE: fancy_regex::Regex = fancy_regex::Regex::new("(?<!\\\\)\\~").unwrap();
-    }
-    RE.replace_all(&raw, env::var("HOME").unwrap()).to_string()
 }

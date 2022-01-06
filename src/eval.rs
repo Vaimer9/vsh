@@ -5,9 +5,9 @@
  */
 
 use crate::builtins;
-use crate::command;
 use crate::command::Builtin;
 use crate::repl::Repl;
+use crate::utils::expand;
 
 use std::collections::HashMap;
 use std::process::Command;
@@ -50,9 +50,15 @@ impl Internalcommand {
             (x, y) => match *x.as_bytes().last().unwrap() as char {
                 '/' => builtins::cd::Cd::run(vec![x.to_string()]),
                 _ => {
-                    let args = y.into_iter().map(command::expand).collect::<Vec<_>>();
+                    let args = y.into_iter().map(expand).collect::<Vec<_>>();
                     if let Some(alias) = &aliases.get(x) {
-                        return Repl::run(alias.to_string(), aliases);
+                        let mut new_x = alias.to_string();
+
+                        for flag in &args {
+                            new_x.push_str(&format!(" {}", flag));
+                        }
+
+                        return Repl::run(new_x, aliases);
                     }
 
                     match Command::new(&x).args(args).spawn() {

@@ -13,6 +13,7 @@ use std::path::PathBuf;
 use crate::prompt::PromptConfig;
 
 use serde_derive::Deserialize;
+use lazy_static::lazy_static;
 
 const BASE_CONFIG: &str = r#"
 # This is the config file for vsh. For now you can only edit the Prompt styling here
@@ -105,4 +106,11 @@ pub fn get_alias(data: &Config) -> HashMap<&str, &str> {
         }
     }
     list
+}
+
+pub fn expand(raw: String) -> String {
+    lazy_static! {
+        static ref RE: fancy_regex::Regex = fancy_regex::Regex::new("(?<!\\\\)\\~").unwrap();
+    }
+    RE.replace_all(&raw, env::var("HOME").unwrap()).to_string()
 }
