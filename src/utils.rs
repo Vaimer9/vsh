@@ -19,7 +19,7 @@ const BASE_CONFIG: &str = r#"
 # This is the config file for vsh. For now you can only edit the Prompt styling here
 # These are the default values
 
-# [prompt]
+[prompt]
 double = false
 color = [115, 147, 179]
 text_color = [33, 33, 33]
