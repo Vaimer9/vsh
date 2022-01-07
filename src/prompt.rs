@@ -22,6 +22,7 @@ pub enum Prompt {
         text_color: (u8, u8, u8),
         double: bool,
     },
+    Arrow,
 }
 
 #[derive(Deserialize)]
@@ -70,7 +71,14 @@ impl Prompt {
                         text_color,
                         double,
                     },
-                    "classic" | _ => Self::Classic {
+                    "arrow" => Self::Arrow,
+                    "classic" => Self::Classic {
+                        // Using "classic" | _ => ... was causing issues
+                        promptchar,
+                        text_color,
+                        double,
+                    },
+                    _ => Self::Classic {
                         promptchar,
                         text_color,
                         double,
@@ -89,6 +97,7 @@ impl Prompt {
             .into_os_string()
             .into_string()
             .unwrap();
+
         match self {
             Self::Modern {
                 promptchar,
@@ -112,6 +121,7 @@ impl Prompt {
                     format!("{}{} ", directory, forwardarrow)
                 }
             }
+
             Self::Classic {
                 promptchar,
                 double,
@@ -130,6 +140,17 @@ impl Prompt {
                         promptchar
                     )
                 }
+            }
+
+            Self::Arrow => {
+                let pretty_cwd =
+                    if let Some(x) = current_dir.split('/').collect::<Vec<&str>>().last() {
+                        x.bold().truecolor(36, 55, 224)
+                    } else {
+                        "/".bold().truecolor(36, 55, 224)
+                    };
+
+                format!("{}  {} ", "➜".bold().truecolor(51, 148, 34), pretty_cwd)
             }
         }
     }
