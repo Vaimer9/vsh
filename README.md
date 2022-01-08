@@ -64,6 +64,7 @@ As you can see customizing is not that hard and doesn't require too much code. I
 - [ ] Intergration with `git`, `node` and `cargo`
 - [x] Customization via `.vshrc`
 - [ ] Plugin Support (Yikes!)
+
 See [projects](https://github.com/xmantle/vsh/projects/1) for more
 ## License
 
