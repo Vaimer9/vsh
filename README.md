@@ -62,9 +62,9 @@ As you can see customizing is not that hard and doesn't require too much code. I
 - [ ] `vsh` Scripting language :eyes:
 - [ ] Custom `ls` command
 - [ ] Intergration with `git`, `node` and `cargo`
-- [ ] Customization via `.vshrc`
+- [x] Customization via `.vshrc`
 - [ ] Plugin Support (Yikes!)
-
+See [projects](https://github.com/xmantle/vsh/projects/1) for more
 ## License
 
 Licensed under a Mozilla Public License.
