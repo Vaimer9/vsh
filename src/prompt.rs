@@ -143,12 +143,18 @@ impl Prompt {
             }
 
             Self::Arrow => {
-                let pretty_cwd =
-                    if let Some(x) = current_dir.split('/').collect::<Vec<&str>>().last() {
-                        x.bold().truecolor(36, 55, 224)
-                    } else {
-                        "/".bold().truecolor(36, 55, 224)
-                    };
+                let pretty_cwd = if current_dir == "/" {
+                    "/".bold().truecolor(36, 55, 224)
+                } else {
+                    // Unwrap free, insured in the first if statement
+                    current_dir
+                        .split('/')
+                        .collect::<Vec<&str>>()
+                        .last()
+                        .unwrap()
+                        .bold()
+                        .truecolor(36, 55, 224)
+                };
 
                 format!("{}  {} ", "➜".bold().truecolor(51, 148, 34), pretty_cwd)
             }
