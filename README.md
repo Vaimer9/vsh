@@ -9,12 +9,19 @@ This is a shell made for the sophisticated power user. Far from finished yet but
 
 ## Installation
 
-Copy and paste the following command and choose the appropriate installation method for you. You can remove the `install.py` file afterwards
-```sh
-wget https://raw.githubusercontent.com/Vaimer9/vsh/main/install.py
-python3 install.py
-```
+#### 1. Install via vsh-vm
 
+vsh-vm is the version manager for vsh. You can install it with:
+```
+wget https://github.com/Vaimer9/vsh-vm/releases/latest/download/vsh-vm
+vsh-vm --help
+```
+You will have to run it as root because it installs vsh into the `/bin` directory.
+Dont worry it won't remove your entire kernel, you can check the source code [here](https://github.com/xmantle/vsh-vm)
+
+#### 2. Manual Install
+
+You can choose the versions in [releases page](https://github.com/xmantle/vsh/releases)
 
 ## Customization
 Once you run vsh for the first time it automatically creates `.vshrc.toml`.
