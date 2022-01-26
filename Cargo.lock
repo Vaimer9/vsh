@@ -84,6 +84,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ctrlc"
+version = "3.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a19c6cedffdc8c03a3346d723eb20bd85a13362bb96dc2ac000842c6381ec7bf"
+dependencies = [
+ "nix",
+ "winapi",
+]
+
+[[package]]
 name = "directories"
 version = "4.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -411,6 +421,7 @@ name = "vsh"
 version = "0.1.0"
 dependencies = [
  "colored",
+ "ctrlc",
  "directories",
  "fancy-regex",
  "lazy_static",

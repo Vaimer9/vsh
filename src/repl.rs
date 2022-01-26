@@ -39,6 +39,10 @@ impl Repl {
             }
         }
 
+        if let Err(cerr) = ctrlc::set_handler(move || {}) {
+            eprintln!("Unable to set up ctrlc handler due to following error: \n{cerr}")
+        }
+
         let config_data = match get_toml(fetch_data()) {
             Ok(x) => x,
             Err(err) => {
