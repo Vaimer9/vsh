@@ -74,7 +74,7 @@ impl Repl {
                             }
                             CommandError::Error(x) => eprintln!("vsh: {}", x),
                             CommandError::Terminated(x) => {
-                                eprintln!("vsh: Process exited with code {}", x)
+                                eprintln!("\rvsh: Process exited with code {}", x)
                             }
                             CommandError::Finished(_) => continue,
                         }
