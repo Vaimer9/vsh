@@ -9,7 +9,6 @@ use serde_derive::Deserialize;
 
 use crate::utils::Config;
 
-#[derive(Debug)]
 pub enum Prompt {
     Modern {
         promptchar: String,
