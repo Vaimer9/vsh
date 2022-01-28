@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 fancy-regex = "0.7.1"
-ctrlc = "3.2.1"
 lazy_static = "*"
 serde = "1.0.130"
 toml = "0.5.8"

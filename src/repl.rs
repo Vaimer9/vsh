@@ -16,16 +16,16 @@ use crate::eval::{CommandError, Internalcommand};
 use crate::prompt::Prompt;
 use crate::utils::{fetch_data, get_alias, get_toml};
 
+use libc::c_int;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
-use libc::c_int;
-use std::thread;
 use signal_hook::consts::signal::*;
 use signal_hook::low_level;
-
+use std::thread;
 
 #[cfg(feature = "extended-siginfo")]
-type Signals = signal_hook::iterator::SignalsInfo<signal_hook::iterator::exfiltrator::origin::WithOrigin>;
+type Signals =
+    signal_hook::iterator::SignalsInfo<signal_hook::iterator::exfiltrator::origin::WithOrigin>;
 
 #[cfg(not(feature = "extended-siginfo"))]
 use signal_hook::iterator::Signals;
@@ -40,7 +40,7 @@ impl Repl {
     pub fn start_shell(&mut self) -> io::Result<()> {
         let mut rl = Editor::<()>::new();
         let home_dir = env::var("HOME").unwrap();
-        
+
         const SIGNALS: &[c_int] = &[SIGTSTP, SIGINT];
         let mut signals = Signals::new(SIGNALS).expect("Failed to create signals struct");
         let handler = signals.handle();
@@ -55,16 +55,12 @@ impl Repl {
             }
         }
 
-        // if let Err(cerr) = ctrlc::set_handler(move || {}) {
-        //     eprintln!("Unable to set up ctrlc handler due to following error: \n{cerr}")
-        // }
-
         thread::spawn(move || {
             for signal in signals.forever() {
                 match signal {
                     SIGTSTP => (),
                     SIGINT => (),
-                    _ => low_level::emulate_default_handler(signal).unwrap()
+                    _ => low_level::emulate_default_handler(signal).unwrap(),
                 }
             }
         });
