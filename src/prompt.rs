@@ -192,4 +192,9 @@ impl PromptInfo {
     pub fn new(terminated: bool, exit_code: Option<i32>) -> Self {
         Self { terminated, exit_code }
     }
+
+    pub fn default(&mut self) {
+        self.terminated = false;
+        self.exit_code = None;
+    }
 }

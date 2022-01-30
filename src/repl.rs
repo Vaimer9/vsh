@@ -94,7 +94,10 @@ impl Repl {
                                 }
                                 process::exit(0);
                             }
-                            CommandError::Error(x) => eprintln!("vsh: {}", x),
+                            CommandError::Error(x) => {
+                                eprintln!("vsh: {}", x);
+                                promptinfo.default();
+                            }
                             CommandError::Terminated(_) => {
                                 println!("\r");
                                 promptinfo.terminated = true;
@@ -105,6 +108,8 @@ impl Repl {
                                 promptinfo.exit_code = Some(code);
                             }
                         }
+                    } else {
+                        promptinfo.default();
                     }
                 }
                 Err(ReadlineError::Interrupted) => println!(),
