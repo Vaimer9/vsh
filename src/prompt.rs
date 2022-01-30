@@ -99,7 +99,7 @@ impl Prompt {
         rt
     }
 
-    pub fn generate_prompt(&self) -> String {
+    pub fn generate_prompt(&self, pri: &PromptInfo) -> String {
         let current_dir = std::env::current_dir()
             .unwrap()
             .into_os_string()
@@ -167,5 +167,11 @@ impl Prompt {
                 format!("{}  {} ", "➜".bold().truecolor(51, 148, 34), pretty_cwd)
             }
         }
+    }
+}
+
+impl PromptInfo {
+    pub fn new(terminated: bool, exit_code: Option<u8>) -> Self {
+        Self { terminated, exit_code }
     }
 }

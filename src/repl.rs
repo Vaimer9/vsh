@@ -13,7 +13,7 @@ use std::io;
 use std::process;
 
 use crate::eval::{CommandError, Internalcommand};
-use crate::prompt::Prompt;
+use crate::prompt::{Prompt, PromptInfo};
 use crate::utils::{fetch_data, get_alias, get_toml};
 
 use libc::c_int;
@@ -24,8 +24,7 @@ use signal_hook::low_level;
 use std::thread;
 
 #[cfg(feature = "extended-siginfo")]
-type Signals =
-    signal_hook::iterator::SignalsInfo<signal_hook::iterator::exfiltrator::origin::WithOrigin>;
+type Signals = signal_hook::iterator::SignalsInfo<signal_hook::iterator::exfiltrator::origin::WithOrigin>;
 
 #[cfg(not(feature = "extended-siginfo"))]
 use signal_hook::iterator::Signals;
@@ -44,6 +43,7 @@ impl Repl {
         const SIGNALS: &[c_int] = &[SIGTSTP, SIGINT];
         let mut signals = Signals::new(SIGNALS).expect("Failed to create signals struct");
         let handler = signals.handle();
+        let mut promptinfo = PromptInfo::new(false, None);
 
         if rl
             .load_history(&format!("{}/.vsh_history", home_dir))
@@ -58,8 +58,8 @@ impl Repl {
         thread::spawn(move || {
             for signal in signals.forever() {
                 match signal {
-                    SIGTSTP => (),
-                    SIGINT => (),
+                    SIGTSTP => (), // ctrlz
+                    SIGINT => (), // ctrlc
                     _ => low_level::emulate_default_handler(signal).unwrap(),
                 }
             }
@@ -76,7 +76,7 @@ impl Repl {
         let aliases = get_alias(&config_data);
 
         loop {
-            let prompt = Prompt::new(&config_data).generate_prompt();
+            let prompt = Prompt::new(&config_data, &promptinfo).generate_prompt();
             let readline = rl.readline(prompt.as_str());
 
             match readline {
@@ -95,8 +95,14 @@ impl Repl {
                                 process::exit(0);
                             }
                             CommandError::Error(x) => eprintln!("vsh: {}", x),
-                            CommandError::Terminated(_) => println!("\r"),
-                            CommandError::Finished(_) => continue,
+                            CommandError::Terminated(_) => {
+                                println!("\r");
+                                promptinfo.terminated = true;
+                            }
+                            CommandError::Finished(code) => {
+                                promptinfo.terminated = false;
+                                promptinfo.exit_code = Some(code);
+                            }
                         }
                     }
                 }
