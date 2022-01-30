@@ -28,8 +28,8 @@ pub enum Prompt {
 // This struct is to know CURRENT prompt Info, i.e what the last last command's exit status was
 #[derive(Debug)]
 pub struct PromptInfo {
-    terminated: bool,
-    exit_code: Option<u8>
+    pub terminated: bool,
+    pub exit_code: Option<i32>
 }
 
 // This Struct Is to get the info from `.vshrc.toml`
@@ -123,10 +123,22 @@ impl Prompt {
                     .replace("\"", "")
                     .truecolor(color.0, color.1, color.2);
 
-                if *double {
-                    format!("{}{}{}\n{} ", backarrow, directory, forwardarrow, pr_char)
+                let cross = if pri.terminated {
+                    "✗".on_truecolor(color.0, color.1, color.2).truecolor(255, 0, 0)
                 } else {
-                    format!("{}{} ", directory, forwardarrow)
+                    colored::ColoredString::from("")
+                };
+
+                let code = if let Some(code) = pri.exit_code {
+                    format!("{}", code).on_truecolor(color.0, color.1, color.2).truecolor(255,244,79)
+                } else {
+                    colored::ColoredString::from("")
+                };
+
+                if *double {
+                    format!("{backarrow}{cross}{code}{directory}{forwardarrow}\n{pr_char} ")
+                } else {
+                    format!("{directory}{code}{cross}{forwardarrow} ")
                 }
             }
 
@@ -164,14 +176,20 @@ impl Prompt {
                         .truecolor(36, 55, 224)
                 };
 
-                format!("{}  {} ", "➜".bold().truecolor(51, 148, 34), pretty_cwd)
+                let arrow = if !pri.terminated {
+                    "➜".bold().truecolor(51, 148, 34)
+                } else {
+                    "➜".bold().truecolor(232, 0, 13)
+                };
+
+                format!("{arrow}  {pretty_cwd} ")
             }
         }
     }
 }
 
 impl PromptInfo {
-    pub fn new(terminated: bool, exit_code: Option<u8>) -> Self {
+    pub fn new(terminated: bool, exit_code: Option<i32>) -> Self {
         Self { terminated, exit_code }
     }
 }

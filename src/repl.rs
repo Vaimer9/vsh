@@ -76,7 +76,7 @@ impl Repl {
         let aliases = get_alias(&config_data);
 
         loop {
-            let prompt = Prompt::new(&config_data, &promptinfo).generate_prompt();
+            let prompt = Prompt::new(&config_data).generate_prompt(&promptinfo);
             let readline = rl.readline(prompt.as_str());
 
             match readline {
@@ -98,6 +98,7 @@ impl Repl {
                             CommandError::Terminated(_) => {
                                 println!("\r");
                                 promptinfo.terminated = true;
+                                promptinfo.exit_code = None;
                             }
                             CommandError::Finished(code) => {
                                 promptinfo.terminated = false;
