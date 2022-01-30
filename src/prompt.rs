@@ -29,7 +29,7 @@ pub enum Prompt {
 #[derive(Debug)]
 pub struct PromptInfo {
     pub terminated: bool,
-    pub exit_code: Option<i32>
+    pub exit_code: Option<i32>,
 }
 
 // This Struct Is to get the info from `.vshrc.toml`
@@ -124,13 +124,17 @@ impl Prompt {
                     .truecolor(color.0, color.1, color.2);
 
                 let cross = if pri.terminated {
-                    "✗".on_truecolor(color.0, color.1, color.2).truecolor(255, 0, 0)
+                    "✗"
+                        .on_truecolor(color.0, color.1, color.2)
+                        .truecolor(255, 0, 0)
                 } else {
                     colored::ColoredString::from("")
                 };
 
                 let code = if let Some(code) = pri.exit_code {
-                    format!("{}", code).on_truecolor(color.0, color.1, color.2).truecolor(255,244,79)
+                    format!("{}", code)
+                        .on_truecolor(color.0, color.1, color.2)
+                        .truecolor(255, 244, 79)
                 } else {
                     colored::ColoredString::from("")
                 };
@@ -190,7 +194,10 @@ impl Prompt {
 
 impl PromptInfo {
     pub fn new(terminated: bool, exit_code: Option<i32>) -> Self {
-        Self { terminated, exit_code }
+        Self {
+            terminated,
+            exit_code,
+        }
     }
 
     pub fn default(&mut self) {

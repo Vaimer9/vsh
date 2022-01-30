@@ -24,7 +24,8 @@ use signal_hook::low_level;
 use std::thread;
 
 #[cfg(feature = "extended-siginfo")]
-type Signals = signal_hook::iterator::SignalsInfo<signal_hook::iterator::exfiltrator::origin::WithOrigin>;
+type Signals =
+    signal_hook::iterator::SignalsInfo<signal_hook::iterator::exfiltrator::origin::WithOrigin>;
 
 #[cfg(not(feature = "extended-siginfo"))]
 use signal_hook::iterator::Signals;
@@ -60,7 +61,7 @@ impl Repl {
             for signal in signals.forever() {
                 match signal {
                     SIGTSTP => (), // ctrlz
-                    SIGINT => (), // ctrlc
+                    SIGINT => (),  // ctrlc
                     _ => low_level::emulate_default_handler(signal).unwrap(),
                 }
             }
