@@ -42,7 +42,8 @@ impl Repl {
 
         const SIGNALS: &[c_int] = &[SIGTSTP, SIGINT];
         let mut signals = Signals::new(SIGNALS).expect("Failed to create signals struct");
-        let handler = signals.handle();
+
+        let _handler = signals.handle();
         let mut promptinfo = PromptInfo::new(false, None);
 
         if rl
