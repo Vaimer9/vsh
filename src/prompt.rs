@@ -9,6 +9,7 @@ use serde_derive::Deserialize;
 
 use crate::utils::Config;
 
+// This struct is to know what prompt appearance was at STARTUP
 pub enum Prompt {
     Modern {
         promptchar: String,
@@ -24,6 +25,14 @@ pub enum Prompt {
     Arrow,
 }
 
+// This struct is to know CURRENT prompt Info, i.e what the last last command's exit status was
+#[derive(Debug)]
+pub struct PromptInfo {
+    terminated: bool,
+    exit_code: Option<u8>
+}
+
+// This Struct Is to get the info from `.vshrc.toml`
 #[derive(Deserialize)]
 pub struct PromptConfig {
     style: Option<String>,
