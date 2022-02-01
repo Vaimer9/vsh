@@ -152,9 +152,9 @@ impl Prompt {
                 text_color,
             } => {
                 let pr_char = if !pri.terminated {
-                    promptchar.bold().truecolor(51, 148, 34)
-                } else {
                     promptchar.bold().truecolor(text_color.0, text_color.1, text_color.2)
+                } else {
+                    promptchar.bold().truecolor(232, 0, 13)
                 };
 
                 if *double {
