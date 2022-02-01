@@ -142,7 +142,7 @@ impl Prompt {
                 if *double {
                     format!("{backarrow}{cross}{code}{directory}{forwardarrow}\n{pr_char} ")
                 } else {
-                    format!("{directory}{code}{cross}{forwardarrow} ")
+                    format!("{code}{cross}{directory}{forwardarrow} ")
                 }
             }
 
@@ -151,6 +151,12 @@ impl Prompt {
                 double,
                 text_color,
             } => {
+                let pr_char = if !pri.terminated {
+                    promptchar.bold().truecolor(51, 148, 34)
+                } else {
+                    promptchar.bold().truecolor(text_color.0, text_color.1, text_color.2)
+                };
+
                 if *double {
                     format!(
                         "[{}]\n{} ",
