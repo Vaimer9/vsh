@@ -161,13 +161,13 @@ impl Prompt {
                     format!(
                         "[{}]\n{} ",
                         current_dir.truecolor(text_color.0, text_color.1, text_color.2),
-                        promptchar
+                        pr_char 
                     )
                 } else {
                     format!(
                         "[{}]{} ",
                         current_dir.truecolor(text_color.0, text_color.1, text_color.2),
-                        promptchar
+                        pr_char
                     )
                 }
             }
