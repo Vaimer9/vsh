@@ -13,7 +13,7 @@ This is a shell made for the sophisticated power user. Far from finished yet but
 
 Install via running the following commands
 ```
-sudo wget https://github.com/xmantle/vsh/releases/latest/download/vsh -q -P /bin
+sudo wget https://github.com/vaimer9/vsh/releases/latest/download/vsh -q -P /bin
 sudo chmod +x /bin/vsh
 ```
 
