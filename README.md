@@ -9,19 +9,22 @@ This is a shell made for the sophisticated power user. Far from finished yet but
 
 ## Installation
 
-#### 1. Install via vsh-vm
+#### 1. Install via wget
 
-vsh-vm is the version manager for vsh. You can install it with:
+Install via running the following commands
 ```
-wget https://github.com/Vaimer9/vsh-vm/releases/latest/download/vsh-vm
-vsh-vm --help
+sudo wget https://github.com/xmantle/vsh/releases/latest/download/vsh -q -P /bin
+sudo chmod +x /bin/vsh
 ```
-You will have to run it as root because it installs vsh into the `/bin` directory.
-Dont worry it won't remove your entire kernel, you can check the source code [here](https://github.com/xmantle/vsh-vm)
 
 #### 2. Manual Install
 
-You can choose the versions in [releases page](https://github.com/xmantle/vsh/releases)
+1. Clone the Repository
+2. Make sure you have `rustup` installed
+3. Make sure you have `build-essentials`
+4. Go into the repository and run `make install`
+
+vsh will be installed in `/bin` directory, you can change this via changing line #11 in `Makefile` on your machine
 
 ## Customization
 Once you run vsh for the first time it automatically creates `.vshrc.toml`.

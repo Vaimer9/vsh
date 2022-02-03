@@ -25,6 +25,11 @@ color = [115, 147, 179]
 text_color = [33, 33, 33]
 promptchar = "λ"
 style = "classic"
+
+[misc]
+alias = [
+]
+
 "#;
 
 #[derive(Deserialize)]
