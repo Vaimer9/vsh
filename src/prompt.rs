@@ -102,8 +102,12 @@ impl Prompt {
     pub fn generate_prompt(&self, pri: &PromptInfo) -> String {
         // The following lines could not be created into a function due to compiler optimization
         // issue, atleast thats what I think
-        let current_dir = { 
-            let current_path = std::env::current_dir().unwrap().into_os_string().into_string().unwrap();
+        let current_dir = {
+            let current_path = std::env::current_dir()
+                .unwrap()
+                .into_os_string()
+                .into_string()
+                .unwrap();
             let home = std::env::var("HOME").unwrap();
             current_path.replace(&home, "~").to_string()
         };
@@ -154,7 +158,9 @@ impl Prompt {
                 text_color,
             } => {
                 let pr_char = if !pri.terminated {
-                    promptchar.bold().truecolor(text_color.0, text_color.1, text_color.2)
+                    promptchar
+                        .bold()
+                        .truecolor(text_color.0, text_color.1, text_color.2)
                 } else {
                     promptchar.bold().truecolor(232, 0, 13)
                 };
@@ -163,7 +169,7 @@ impl Prompt {
                     format!(
                         "[{}]\n{} ",
                         current_dir.truecolor(text_color.0, text_color.1, text_color.2),
-                        pr_char 
+                        pr_char
                     )
                 } else {
                     format!(
