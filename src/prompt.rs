@@ -100,11 +100,13 @@ impl Prompt {
     }
 
     pub fn generate_prompt(&self, pri: &PromptInfo) -> String {
-        let current_dir = std::env::current_dir()
-            .unwrap()
-            .into_os_string()
-            .into_string()
-            .unwrap();
+        // The following lines could not be created into a function due to compiler optimization
+        // issue, atleast thats what I think
+        let current_dir = { 
+            let current_path = std::env::current_dir().unwrap().into_os_string().into_string().unwrap();
+            let home = std::env::var("HOME").unwrap();
+            current_path.replace(&home, "~").to_string()
+        };
 
         match self {
             Self::Modern {

@@ -98,3 +98,7 @@ pub fn expand(raw: String) -> String {
     }
     RE.replace_all(&raw, env::var("HOME").unwrap()).to_string()
 }
+
+// pub fn cwd() -> String {
+//     env::var("PWD").unwrap().to_string().replace(&env::var("HOME").unwrap(), "~").to_string()
+// }
