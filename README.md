@@ -66,7 +66,6 @@ As you can see customizing is not that hard and doesn't require too much code. I
 - [x] Multiple Commands
 - [x] Command History
 - [x] Prompt Customization
-- [x] Install Script
 - [ ] `ctrl` + `z` functionality (i.e Being able to run processes in the background)
 - [ ] Piping
 - [x] Command Completion
