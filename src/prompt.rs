@@ -109,7 +109,7 @@ impl Prompt {
                 .into_string()
                 .unwrap();
             let home = std::env::var("HOME").unwrap();
-            current_path.replace(&home, "~").to_string()
+            current_path.replace(&home, "~")
         };
 
         match self {

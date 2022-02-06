@@ -8,12 +8,12 @@
 
 extern crate alloc;
 
+use std::borrow::Cow::{self, Borrowed, Owned};
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io;
 use std::process;
-use std::borrow::Cow::{self, Borrowed, Owned};
 
 use crate::eval::{CommandError, Internalcommand};
 use crate::prompt::{Prompt, PromptInfo};
@@ -30,7 +30,7 @@ use rustyline::error::ReadlineError;
 use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
 use rustyline::hint::{Hinter, HistoryHinter};
 use rustyline::validate::{self, MatchingBracketValidator, Validator};
-use rustyline::{Cmd, CompletionType, Config, Context, EditMode, Editor, KeyEvent};
+use rustyline::{CompletionType, Config, Context, EditMode, Editor};
 use rustyline_derive::Helper;
 
 #[cfg(feature = "extended-siginfo")]
@@ -39,7 +39,6 @@ type Signals =
 
 #[cfg(not(feature = "extended-siginfo"))]
 use signal_hook::iterator::Signals;
-
 
 #[derive(Helper)]
 struct PromptHelper {
@@ -53,7 +52,12 @@ struct PromptHelper {
 impl Completer for PromptHelper {
     type Candidate = Pair;
 
-    fn complete(&self, line: &str, pos: usize, ctx: &Context<'_>) -> Result<(usize, Vec<Pair>), ReadlineError> {
+    fn complete(
+        &self,
+        line: &str,
+        pos: usize,
+        ctx: &Context<'_>,
+    ) -> Result<(usize, Vec<Pair>), ReadlineError> {
         self.completer.complete(line, pos, ctx)
     }
 }
@@ -105,7 +109,6 @@ impl Validator for PromptHelper {
     }
 }
 
-
 pub struct Repl;
 
 impl Repl {
@@ -120,9 +123,9 @@ impl Repl {
             .edit_mode(EditMode::Emacs)
             .output_stream(OutputStreamType::Stdout)
             .build();
-        
+
         let mut rl = Editor::with_config(prconf);
-            
+
         let home_dir = env::var("HOME").unwrap();
 
         const SIGNALS: &[c_int] = &[SIGTSTP, SIGINT];
@@ -169,7 +172,7 @@ impl Repl {
                 highlighter: MatchingBracketHighlighter::new(),
                 hinter: HistoryHinter {},
                 colored_prompt: prompt.clone(),
-                validator: MatchingBracketValidator::new()
+                validator: MatchingBracketValidator::new(),
             };
             rl.set_helper(Some(helper));
 
