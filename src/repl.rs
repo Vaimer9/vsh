@@ -121,16 +121,7 @@ impl Repl {
             .output_stream(OutputStreamType::Stdout)
             .build();
         
-        let helper = PromptHelper {
-            completer: FilenameCompleter::new(),
-            highlighter: MatchingBracketHighlighter::new(),
-            hinter: HistoryHinter {},
-            colored_prompt: "".to_owned(),
-            validator: MatchingBracketValidator::new()
-        };
-
         let mut rl = Editor::with_config(prconf);
-        rl.set_helper(Some(helper));
             
         let home_dir = env::var("HOME").unwrap();
 
@@ -172,6 +163,16 @@ impl Repl {
 
         loop {
             let prompt = Prompt::new(&config_data).generate_prompt(&promptinfo);
+
+            let helper = PromptHelper {
+                completer: FilenameCompleter::new(),
+                highlighter: MatchingBracketHighlighter::new(),
+                hinter: HistoryHinter {},
+                colored_prompt: prompt.clone(),
+                validator: MatchingBracketValidator::new()
+            };
+            rl.set_helper(Some(helper));
+
             let readline = rl.readline(prompt.as_str());
 
             match readline {
