@@ -69,7 +69,7 @@ As you can see customizing is not that hard and doesn't require too much code. I
 - [x] Install Script
 - [ ] `ctrl` + `z` functionality (i.e Being able to run processes in the background)
 - [ ] Piping
-- [ ] Command Completion
+- [x] Command Completion
 - [ ] `vsh` Scripting language :eyes:
 - [ ] Custom `ls` command
 - [ ] Intergration with `git`, `node` and `cargo`
