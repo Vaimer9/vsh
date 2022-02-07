@@ -81,5 +81,3 @@ See [projects](https://github.com/xmantle/vsh/projects/1) for more
 Licensed under a Mozilla Public License.
 
 For more information take a look at the license [here](./LICENSE).
-
-

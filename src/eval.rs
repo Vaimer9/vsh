@@ -42,11 +42,11 @@ impl Internalcommand {
     pub fn eval(&mut self, aliases: &HashMap<&str, &str>) -> Result<(), CommandError> {
         match (self.keyword.as_str(), self.args.clone()) {
             ("cd", args) => builtins::cd::Cd::run(args),
-            ("", _) => {
-                println!();
-                Ok(())
-            }
+
+            ("", _) => Ok(()),
+
             ("exit", _) => Err(CommandError::Exit),
+
             (x, y) => match *x.as_bytes().last().unwrap() as char {
                 '/' => builtins::cd::Cd::run(vec![x.to_string()]),
                 _ => {
