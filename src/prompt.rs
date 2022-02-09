@@ -33,14 +33,6 @@ pub struct PromptInfo {
 }
 
 // This Struct Is to get the info from `.vshrc.toml`
-#[derive(Deserialize)]
-pub struct PromptConfig {
-    style: Option<String>,
-    promptchar: Option<String>,
-    color: Option<[u8; 3]>,
-    text_color: Option<[u8; 3]>,
-    double: Option<bool>,
-}
 
 impl Prompt {
     pub fn new(data: &Config) -> Self {

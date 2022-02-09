@@ -51,6 +51,7 @@ pub struct PromptConfig {
     promptchar: Option<String>,
     color: Option<[u8; 3]>,
     text_color: Option<[u8; 3]>,
+
     double: Option<bool>,
 }
 
