@@ -5,7 +5,6 @@
  */
 
 use colored::*;
-use serde_derive::Deserialize;
 
 use crate::utils::Config;
 

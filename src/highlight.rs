@@ -3,26 +3,25 @@ extern crate alloc;
 use std::borrow::Cow::{self, Borrowed, Owned};
 
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
-use rustyline::config::OutputStreamType;
 use rustyline::error::ReadlineError;
 use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
 use rustyline::hint::{Hinter, HistoryHinter};
 use rustyline::validate::{self, MatchingBracketValidator, Validator};
-use rustyline::{CompletionType, Config, Context, EditMode, Editor};
+use rustyline::Context;
 use rustyline_derive::Helper;
 
 // Holds all data for Highlighting, bracket validation and completion
 // Used by rustyline
 #[derive(Helper)]
-struct PromptEffects {
-    completer: FilenameCompleter,
-    highlighter: MatchingBracketHighlighter,
-    validator: MatchingBracketValidator,
-    hinter: HistoryHinter,
-    colored_prompt: String,
+pub struct PromptEffects {
+    pub completer: FilenameCompleter,
+    pub highlighter: MatchingBracketHighlighter,
+    pub validator: MatchingBracketValidator,
+    pub hinter: HistoryHinter,
+    pub colored_prompt: String,
 }
 
-impl Completer for PromptHelper {
+impl Completer for PromptEffects {
     type Candidate = Pair;
 
     fn complete(
@@ -35,7 +34,7 @@ impl Completer for PromptHelper {
     }
 }
 
-impl Hinter for PromptHelper {
+impl Hinter for PromptEffects {
     type Hint = String;
 
     fn hint(&self, line: &str, pos: usize, ctx: &Context<'_>) -> Option<String> {
@@ -43,7 +42,7 @@ impl Hinter for PromptHelper {
     }
 }
 
-impl Highlighter for PromptHelper {
+impl Highlighter for PromptEffects {
     fn highlight_prompt<'b, 's: 'b, 'p: 'b>(
         &'s self,
         prompt: &'p str,
@@ -57,8 +56,7 @@ impl Highlighter for PromptHelper {
     }
 
     fn highlight_hint<'h>(&self, hint: &'h str) -> Cow<'h, str> {
-        // Owned("\x1b[2m".to_owned() + hint + "\x1b[m")
-        Owned(format!("{}", hint.red()))
+        Owned("\x1b[2m".to_owned() + hint + "\x1b[m")
     }
 
     fn highlight<'l>(&self, line: &'l str, pos: usize) -> Cow<'l, str> {
@@ -70,7 +68,7 @@ impl Highlighter for PromptHelper {
     }
 }
 
-impl Validator for PromptHelper {
+impl Validator for PromptEffects {
     fn validate(
         &self,
         ctx: &mut validate::ValidationContext,

@@ -10,8 +10,6 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
-use crate::prompt::PromptConfig;
-
 use lazy_static::lazy_static;
 use serde_derive::Deserialize;
 
@@ -47,12 +45,12 @@ pub struct Misc {
 
 #[derive(Deserialize)]
 pub struct PromptConfig {
-    style: Option<String>,
-    promptchar: Option<String>,
-    color: Option<[u8; 3]>,
-    text_color: Option<[u8; 3]>,
-
-    double: Option<bool>,
+    pub style: Option<String>,
+    pub promptchar: Option<String>,
+    pub color: Option<[u8; 3]>,
+    pub text_color: Option<[u8; 3]>,
+    pub suggestion_color: Option<[u8; 3]>,
+    pub double: Option<bool>,
 }
 
 pub fn fetch_data() -> String {
@@ -110,7 +108,3 @@ pub fn expand(raw: String) -> String {
     }
     RE.replace_all(&raw, env::var("HOME").unwrap()).to_string()
 }
-
-// pub fn cwd() -> String {
-//     env::var("PWD").unwrap().to_string().replace(&env::var("HOME").unwrap(), "~").to_string()
-// }

@@ -9,18 +9,25 @@
 use std::env;
 use std::fs::File;
 use std::io;
-use std::io::Write;
 use std::process;
 use std::thread;
 
 use crate::eval::{CommandError, Internalcommand};
 use crate::prompt::{Prompt, PromptInfo};
 use crate::utils::{fetch_data, get_alias, get_toml};
+use crate::highlight::PromptEffects;
 
 use libc::c_int;
 use signal_hook::consts::signal::*;
 use signal_hook::low_level;
-use colored::*;
+
+use rustyline::completion::FilenameCompleter;
+use rustyline::config::OutputStreamType;
+use rustyline::error::ReadlineError;
+use rustyline::highlight::MatchingBracketHighlighter;
+use rustyline::hint::HistoryHinter;
+use rustyline::validate::MatchingBracketValidator;
+use rustyline::{CompletionType, Config, EditMode, Editor};
 
 #[cfg(feature = "extended-siginfo")]
 type Signals =
@@ -87,13 +94,14 @@ impl Repl {
         loop {
             let prompt = Prompt::new(&config_data).generate_prompt(&promptinfo);
 
-            let helper = PromptHelper {
+            let helper = PromptEffects {
                 completer: FilenameCompleter::new(),
                 highlighter: MatchingBracketHighlighter::new(),
                 hinter: HistoryHinter {},
                 colored_prompt: prompt.clone(),
                 validator: MatchingBracketValidator::new(),
             };
+
             rl.set_helper(Some(helper));
 
             let readline = rl.readline(prompt.as_str());
