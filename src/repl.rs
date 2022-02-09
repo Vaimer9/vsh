@@ -15,13 +15,6 @@ use std::io;
 use std::io::Write;
 use std::process;
 
-// use std::{
-//     borrow::Cow::{self, Borrowed, Owned},
-//     collections::HashMap,
-//     env,
-//     fs::File
-// }
-
 use crate::eval::{CommandError, Internalcommand};
 use crate::prompt::{Prompt, PromptInfo};
 use crate::utils::{fetch_data, get_alias, get_toml};
@@ -182,11 +175,6 @@ impl Repl {
                 validator: MatchingBracketValidator::new(),
             };
             rl.set_helper(Some(helper));
-
-            print!("\r\n");
-            if let Err(flusherr) = std::io::stdout().flush() {
-                eprintln!("vsh: Could not flush stdout\n{flusherr}");
-            }
 
             let readline = rl.readline(prompt.as_str());
 
