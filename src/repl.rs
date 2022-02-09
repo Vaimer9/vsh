@@ -9,7 +9,6 @@
 extern crate alloc;
 
 use std::borrow::Cow::{self, Borrowed, Owned};
-use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io;

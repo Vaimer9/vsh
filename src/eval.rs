@@ -6,7 +6,6 @@
 
 use crate::builtins;
 use crate::command::Builtin;
-use crate::repl::Repl;
 use crate::utils::expand;
 
 use std::collections::HashMap;
