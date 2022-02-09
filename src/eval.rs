@@ -58,7 +58,7 @@ impl Internalcommand {
                             new_x.push_str(&format!(" {}", flag));
                         }
 
-                        return Repl::run(new_x, aliases);
+                        return Self::run(new_x, aliases);
                     }
 
                     match Command::new(&x).args(args).spawn() {
@@ -85,5 +85,26 @@ impl Internalcommand {
                 }
             },
         }
+    }
+
+    pub fn run(x: String, y: &HashMap<&str, &str>) -> Result<(), CommandError> {
+        let mut last_return = Ok(());
+        for com in x.split(';') {
+            last_return = Self::run_linked_commands(com.into(), y);
+        }
+        last_return
+    }
+
+    fn run_command(com: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
+        Internalcommand::new(com).eval(x)
+    }
+
+    fn run_linked_commands(commands: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
+        for linked_com in commands.split("&&") {
+            if let Err(e) = Self::run_command(linked_com.to_string(), x) {
+                return Err(e);
+            }
+        }
+        Ok(())
     }
 }

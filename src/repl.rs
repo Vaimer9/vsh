@@ -195,7 +195,7 @@ impl Repl {
                 Ok(x) => {
                     rl.add_history_entry(x.as_str());
 
-                    if let Err(e) = Self::run(x, &aliases) {
+                    if let Err(e) = Internalcommand::run(x, &aliases) {
                         match e {
                             CommandError::Exit => {
                                 if rl
@@ -241,24 +241,5 @@ impl Repl {
         Ok(())
     }
 
-    pub fn run(x: String, y: &HashMap<&str, &str>) -> Result<(), CommandError> {
-        let mut last_return = Ok(());
-        for com in x.split(';') {
-            last_return = Self::run_linked_commands(com.into(), y);
-        }
-        last_return
-    }
-
-    fn run_command(com: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
-        Internalcommand::new(com).eval(x)
-    }
-
-    fn run_linked_commands(commands: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
-        for linked_com in commands.split("&&") {
-            if let Err(e) = Self::run_command(linked_com.to_string(), x) {
-                return Err(e);
-            }
-        }
-        Ok(())
-    }
+    
 }
