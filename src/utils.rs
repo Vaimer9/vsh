@@ -32,6 +32,8 @@ alias = [
 
 "#;
 
+// Config for .vshrc.toml config file
+// For example: prompt would mean [prompt]
 #[derive(Deserialize)]
 pub struct Config {
     pub prompt: Option<PromptConfig>,
@@ -41,6 +43,15 @@ pub struct Config {
 #[derive(Deserialize)]
 pub struct Misc {
     pub alias: Option<Vec<[String; 2]>>,
+}
+
+#[derive(Deserialize)]
+pub struct PromptConfig {
+    style: Option<String>,
+    promptchar: Option<String>,
+    color: Option<[u8; 3]>,
+    text_color: Option<[u8; 3]>,
+    double: Option<bool>,
 }
 
 pub fn fetch_data() -> String {
