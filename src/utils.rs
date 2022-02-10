@@ -36,6 +36,7 @@ alias = [
 pub struct Config {
     pub prompt: Option<PromptConfig>,
     pub misc: Option<Misc>,
+    pub effects: Option<EffectsConfig>
 }
 
 #[derive(Deserialize)]
@@ -49,8 +50,17 @@ pub struct PromptConfig {
     pub promptchar: Option<String>,
     pub color: Option<[u8; 3]>,
     pub text_color: Option<[u8; 3]>,
-    pub suggestion_color: Option<[u8; 3]>,
     pub double: Option<bool>,
+}
+
+#[derive(Deserialize)]
+pub struct EffectsConfig {
+    pub truecolors: Option<bool>,
+    pub underlined: Option<bool>,
+    pub bold: Option<bool>,
+    pub dimmed: Option<bool>,
+    pub suggestion_color: Option<String>,
+    pub true_suggestion_color: Option<[u8; 3]>
 }
 
 pub fn fetch_data() -> String {

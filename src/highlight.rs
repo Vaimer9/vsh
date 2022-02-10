@@ -2,6 +2,8 @@ extern crate alloc;
 
 use std::borrow::Cow::{self, Borrowed, Owned};
 
+use crate::utils::Config;
+
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
 use rustyline::error::ReadlineError;
 use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
@@ -19,6 +21,57 @@ pub struct PromptEffects {
     pub validator: MatchingBracketValidator,
     pub hinter: HistoryHinter,
     pub colored_prompt: String,
+    pub colores: Colors
+}
+
+// Data struct
+struct EffectsConfig {
+    bold: bool,
+    underlined: bool,
+    dimmed: bool
+}
+
+enum Colors {
+    Black(EffectsConfig),
+    Red(EffectsConfig),
+    Green(EffectsConfig),
+    Yellow(EffectsConfig),
+    Blue(EffectsConfig),
+    Purple(EffectsConfig),
+    Cyan(EffectsConfig),
+    White(EffectsConfig),
+    Truecolor([u8; 3])
+}
+
+impl PromptEffects {
+    pub fn new(config: &Config) -> Self {
+        // Default Values for Effects
+        let mut (bold, underlined, dimmed) = (false, false, false); 
+        let mut truecolors_exist = true;
+        let mut truecolors = [200, 0, 0];
+        let mut 
+
+
+        if let Some(cnf) = config.effects {
+            if let Some(x) = cnf.bold {
+                bold = x;
+            }
+
+            if let Some(x) = cnf.underlined {
+                underlined = x;
+            }
+
+            if let Some(x) = cnf.dimmed {
+                dimmed = x;
+            }
+
+            if let Some(x) = cnf.truecolors && Some(y) = cnf.true_suggestion_color {
+                if x {
+                    truecolors = y;
+                }
+            }
+        }
+    }
 }
 
 impl Completer for PromptEffects {
