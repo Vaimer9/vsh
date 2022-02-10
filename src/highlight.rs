@@ -40,7 +40,7 @@ enum Colors {
     Purple(EffectsConfig),
     Cyan(EffectsConfig),
     White(EffectsConfig),
-    Truecolor([u8; 3])
+    Truecolor([u8; 3], EffectsConfig)
 }
 
 impl PromptEffects {
@@ -49,7 +49,7 @@ impl PromptEffects {
         let mut (bold, underlined, dimmed) = (false, false, false); 
         let mut truecolors_exist = true;
         let mut truecolors = [200, 0, 0];
-        let mut 
+        let mut suggestions = String::from("truecolor");
 
 
         if let Some(cnf) = config.effects {
@@ -70,7 +70,25 @@ impl PromptEffects {
                     truecolors = y;
                 }
             }
+
+            if let Some(x) = conf.suggestions_color {
+                suggestions = x;
+            }
         }
+
+        let effconf = EffectsConfig { bold, underlined, dimmed };
+        let mut colors = match suggestions.to_lowercase().as_str() {
+            "black"  => Colors::Black(effconf)
+            "red"    => Colors::Red(effconf)
+            "green"  => Colors::Green(effconf)
+            "yellow" => Colors::Yellow(effconf)
+            "blue"   => Colors::Blue(effconf)
+            "purple" => Colors::Purple(effconf)
+            "cyan"   => Colors::Cyan(effconf)
+            "white"  => Colors::White(effconf)
+            _        => Colors::Truecolor(truecolors, effconf)
+        };
+
     }
 }
 
