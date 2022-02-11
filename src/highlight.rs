@@ -21,7 +21,7 @@ pub struct PromptEffects {
     pub validator: MatchingBracketValidator,
     pub hinter: HistoryHinter,
     pub colored_prompt: String,
-    pub colores: Colors
+    pub colors: Colors
 }
 
 // Data struct
@@ -46,7 +46,7 @@ enum Colors {
 impl PromptEffects {
     pub fn new(config: &Config) -> Self {
         // Default Values for Effects
-        let mut (bold, underlined, dimmed) = (false, false, false); 
+        let (mut bold, mut underlined, mut dimmed) = (false, false, false); 
         let mut truecolors_exist = true;
         let mut truecolors = [200, 0, 0];
         let mut suggestions = String::from("truecolor");
@@ -65,27 +65,27 @@ impl PromptEffects {
                 dimmed = x;
             }
 
-            if let Some(x) = cnf.truecolors && Some(y) = cnf.true_suggestion_color {
+            if let Some(x) = cnf.truecolors && let Some(y) = cnf.true_suggestion_color {
                 if x {
                     truecolors = y;
                 }
             }
 
-            if let Some(x) = conf.suggestions_color {
+            if let Some(x) = cnf.suggestions_color {
                 suggestions = x;
             }
         }
 
         let effconf = EffectsConfig { bold, underlined, dimmed };
         let mut colors = match suggestions.to_lowercase().as_str() {
-            "black"  => Colors::Black(effconf)
-            "red"    => Colors::Red(effconf)
-            "green"  => Colors::Green(effconf)
-            "yellow" => Colors::Yellow(effconf)
-            "blue"   => Colors::Blue(effconf)
-            "purple" => Colors::Purple(effconf)
-            "cyan"   => Colors::Cyan(effconf)
-            "white"  => Colors::White(effconf)
+            "black"  => Colors::Black(effconf),
+            "red"    => Colors::Red(effconf),
+            "green"  => Colors::Green(effconf),
+            "yellow" => Colors::Yellow(effconf),
+            "blue"   => Colors::Blue(effconf),
+            "purple" => Colors::Purple(effconf),
+            "cyan"   => Colors::Cyan(effconf),
+            "white"  => Colors::White(effconf),
             _        => Colors::Truecolor(truecolors, effconf)
         };
 
