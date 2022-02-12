@@ -89,6 +89,14 @@ impl Repl {
             }
         };
 
+        let helpercnf = match get_toml(fetch_data()) {
+            Ok(x) => x,
+            Err(err) => {
+                println!("{:?}", err);
+                get_toml(String::from("")).unwrap() // Unwrap free
+            }
+        };
+
         let aliases = get_alias(&config_data);
 
         loop {
@@ -100,6 +108,7 @@ impl Repl {
                 hinter: HistoryHinter {},
                 colored_prompt: prompt.clone(),
                 validator: MatchingBracketValidator::new(),
+                ctx: helpercnf
             };
 
             rl.set_helper(Some(helper));

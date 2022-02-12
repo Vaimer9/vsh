@@ -4,6 +4,8 @@ use std::borrow::Cow::{self, Borrowed, Owned};
 
 use crate::utils::Config;
 
+use colored::*;
+
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
 use rustyline::error::ReadlineError;
 use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
@@ -21,75 +23,7 @@ pub struct PromptEffects {
     pub validator: MatchingBracketValidator,
     pub hinter: HistoryHinter,
     pub colored_prompt: String,
-    pub colors: Colors
-}
-
-// Data struct
-struct EffectsConfig {
-    bold: bool,
-    underlined: bool,
-    dimmed: bool
-}
-
-enum Colors {
-    Black(EffectsConfig),
-    Red(EffectsConfig),
-    Green(EffectsConfig),
-    Yellow(EffectsConfig),
-    Blue(EffectsConfig),
-    Purple(EffectsConfig),
-    Cyan(EffectsConfig),
-    White(EffectsConfig),
-    Truecolor([u8; 3], EffectsConfig)
-}
-
-impl PromptEffects {
-    pub fn new(config: &Config) -> Self {
-        // Default Values for Effects
-        let (mut bold, mut underlined, mut dimmed) = (false, false, false); 
-        let mut truecolors_exist = true;
-        let mut truecolors = [200, 0, 0];
-        let mut suggestions = String::from("truecolor");
-
-
-        if let Some(cnf) = config.effects {
-            if let Some(x) = cnf.bold {
-                bold = x;
-            }
-
-            if let Some(x) = cnf.underlined {
-                underlined = x;
-            }
-
-            if let Some(x) = cnf.dimmed {
-                dimmed = x;
-            }
-
-            if let Some(x) = cnf.truecolors && let Some(y) = cnf.true_suggestion_color {
-                if x {
-                    truecolors = y;
-                }
-            }
-
-            if let Some(x) = cnf.suggestions_color {
-                suggestions = x;
-            }
-        }
-
-        let effconf = EffectsConfig { bold, underlined, dimmed };
-        let mut colors = match suggestions.to_lowercase().as_str() {
-            "black"  => Colors::Black(effconf),
-            "red"    => Colors::Red(effconf),
-            "green"  => Colors::Green(effconf),
-            "yellow" => Colors::Yellow(effconf),
-            "blue"   => Colors::Blue(effconf),
-            "purple" => Colors::Purple(effconf),
-            "cyan"   => Colors::Cyan(effconf),
-            "white"  => Colors::White(effconf),
-            _        => Colors::Truecolor(truecolors, effconf)
-        };
-
-    }
+    pub ctx: Config
 }
 
 impl Completer for PromptEffects {
@@ -127,7 +61,43 @@ impl Highlighter for PromptEffects {
     }
 
     fn highlight_hint<'h>(&self, hint: &'h str) -> Cow<'h, str> {
-        Owned("\x1b[2m".to_owned() + hint + "\x1b[m")
+        let mut estr = hint.clear();
+
+        if let Some(eff) = &self.ctx.effects {
+            
+            if eff.underlined.is_some() {
+                estr = estr.underline();
+            } else if eff.bold.is_some() {
+                estr = estr.underline();
+            } else if eff.dimmed.is_some() {
+                estr = estr.dimmed();
+            }
+            
+            if let Some(x) = &eff.suggestion_color {
+                match x.to_lowercase().as_str() {
+                    "black"     => estr = estr.black(),
+                    "red"       => estr = estr.red(),
+                    "green"     => estr = estr.green(),
+                    "yellow"    => estr = estr.yellow(),
+                    "blue"      => estr = estr.blue(),
+                    "purple"    => estr = estr.purple(),
+                    "cyan"      => estr = estr.cyan(),
+                    "white" | _ => estr = estr.white(),
+                }
+            }
+
+            if let Some(x) = eff.truecolors {
+                if x {
+                    if let Some(y) = eff.true_suggestion_color {
+                        estr.clear(); // As both truecolors and suggestions color might exist we need to clear
+                        estr = estr.truecolor(y[0], y[1], y[2]);
+                    }
+                }
+            }
+        }
+
+        Owned(format!("{}", estr))
+        // Owned("\x1b[2m".to_owned() + hint + "\x1b[m")
     }
 
     fn highlight<'l>(&self, line: &'l str, pos: usize) -> Cow<'l, str> {

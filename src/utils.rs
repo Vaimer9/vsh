@@ -36,7 +36,7 @@ alias = [
 pub struct Config {
     pub prompt: Option<PromptConfig>,
     pub misc: Option<Misc>,
-    pub effects: Option<EffectsConfig>
+    pub effects: Option<EffectsCtx>
 }
 
 #[derive(Deserialize)]
@@ -54,7 +54,7 @@ pub struct PromptConfig {
 }
 
 #[derive(Deserialize)]
-pub struct EffectsConfig {
+pub struct EffectsCtx {
     pub truecolors: Option<bool>,
     pub underlined: Option<bool>,
     pub bold: Option<bool>,
