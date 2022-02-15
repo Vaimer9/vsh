@@ -14,9 +14,6 @@ use lazy_static::lazy_static;
 use serde_derive::Deserialize;
 
 const BASE_CONFIG: &str = r#"
-# This is the config file for vsh. For now you can only edit the Prompt styling here
-# These are the default values
-
 [prompt]
 double = false
 color = [115, 147, 179]
@@ -26,8 +23,17 @@ style = "classic"
 
 [misc]
 alias = [
+	["", ""]
 ]
 
+[effects]
+underlined = false 
+bold = true
+dimmed = false
+suggestion_color = "red"
+
+truecolors = false 
+true_suggestion_color = [255, 0, 0]
 "#;
 
 // Config for .vshrc.toml config file

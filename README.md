@@ -32,7 +32,6 @@ All the customization possible is written there.
 Even then here is the text
 ```toml
 [prompt]
-
 double = false
 color = [115, 147, 179]
 text_color = [33, 33, 33]
@@ -43,6 +42,15 @@ style = "classic"
 alias = [
 	["", ""]
 ]
+
+[effects]
+underlined = false 
+bold = true
+dimmed = false
+suggestion_color = "red"
+
+truecolors = false 
+true_suggestion_color = [255, 0, 0]
 ```
 
 
