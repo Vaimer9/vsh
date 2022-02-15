@@ -64,11 +64,11 @@ impl Highlighter for PromptEffects {
         let mut estr = hint.red();
 
         if let Some(eff) = &self.ctx.effects {
-            if eff.underlined.is_some() {
+            if eff.underlined == Some(true) {
                 estr = estr.underline();
-            } else if eff.bold.is_some() {
-                estr = estr.underline();
-            } else if eff.dimmed.is_some() {
+            } else if eff.bold == Some(true) {
+                estr = estr.bold();
+            } else if eff.dimmed == Some(true) {
                 estr = estr.dimmed();
             }
 
