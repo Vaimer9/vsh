@@ -7,10 +7,10 @@
 mod builtins;
 mod command;
 mod eval;
+mod highlight;
 mod prompt;
 mod repl;
 mod utils;
-mod highlight;
 
 use repl::Repl;
 

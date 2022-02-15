@@ -13,9 +13,9 @@ use std::process;
 use std::thread;
 
 use crate::eval::{CommandError, Internalcommand};
+use crate::highlight::PromptEffects;
 use crate::prompt::{Prompt, PromptInfo};
 use crate::utils::{fetch_data, get_alias, get_toml};
-use crate::highlight::PromptEffects;
 
 use libc::c_int;
 use signal_hook::consts::signal::*;
@@ -89,14 +89,6 @@ impl Repl {
             }
         };
 
-        let helpercnf = match get_toml(fetch_data()) {
-            Ok(x) => x,
-            Err(err) => {
-                println!("{:?}", err);
-                get_toml(String::from("")).unwrap() // Unwrap free
-            }
-        };
-
         let aliases = get_alias(&config_data);
 
         loop {
@@ -108,7 +100,7 @@ impl Repl {
                 hinter: HistoryHinter {},
                 colored_prompt: prompt.clone(),
                 validator: MatchingBracketValidator::new(),
-                ctx: helpercnf
+                ctx: config_data.clone(),
             };
 
             rl.set_helper(Some(helper));
@@ -164,6 +156,4 @@ impl Repl {
         }
         Ok(())
     }
-
-    
 }

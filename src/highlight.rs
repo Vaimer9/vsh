@@ -23,7 +23,7 @@ pub struct PromptEffects {
     pub validator: MatchingBracketValidator,
     pub hinter: HistoryHinter,
     pub colored_prompt: String,
-    pub ctx: Config
+    pub ctx: Config,
 }
 
 impl Completer for PromptEffects {
@@ -61,10 +61,9 @@ impl Highlighter for PromptEffects {
     }
 
     fn highlight_hint<'h>(&self, hint: &'h str) -> Cow<'h, str> {
-        let mut estr = hint.clear();
+        let mut estr = hint.red();
 
         if let Some(eff) = &self.ctx.effects {
-            
             if eff.underlined.is_some() {
                 estr = estr.underline();
             } else if eff.bold.is_some() {
@@ -72,24 +71,24 @@ impl Highlighter for PromptEffects {
             } else if eff.dimmed.is_some() {
                 estr = estr.dimmed();
             }
-            
+
             if let Some(x) = &eff.suggestion_color {
                 match x.to_lowercase().as_str() {
-                    "black"     => estr = estr.black(),
-                    "red"       => estr = estr.red(),
-                    "green"     => estr = estr.green(),
-                    "yellow"    => estr = estr.yellow(),
-                    "blue"      => estr = estr.blue(),
-                    "purple"    => estr = estr.purple(),
-                    "cyan"      => estr = estr.cyan(),
-                    "white" | _ => estr = estr.white(),
+                    "black" => estr = estr.black(),
+                    "green" => estr = estr.green(),
+                    "yellow" => estr = estr.yellow(),
+                    "blue" => estr = estr.blue(),
+                    "purple" => estr = estr.purple(),
+                    "cyan" => estr = estr.cyan(),
+                    "white" => estr = estr.white(),
+                    "red" | _ => estr = estr.red(),
                 }
             }
 
             if let Some(x) = eff.truecolors {
                 if x {
                     if let Some(y) = eff.true_suggestion_color {
-                        estr.clear(); // As both truecolors and suggestions color might exist we need to clear
+                        // estr = estr.clear(); // As both truecolors and suggestions color might exist we need to clear
                         estr = estr.truecolor(y[0], y[1], y[2]);
                     }
                 }
