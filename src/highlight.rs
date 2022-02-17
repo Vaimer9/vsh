@@ -93,7 +93,6 @@ impl Highlighter for PromptEffects {
             if let Some(x) = eff.truecolors {
                 if x {
                     if let Some(y) = eff.true_suggestion_color {
-                        // estr = estr.clear(); // As both truecolors and suggestions color might exist we need to clear
                         estr = estr.truecolor(y[0], y[1], y[2]);
                     }
                 }
@@ -101,7 +100,6 @@ impl Highlighter for PromptEffects {
         }
 
         Owned(format!("{}", estr))
-        // Owned("\x1b[2m".to_owned() + hint + "\x1b[m")
     }
 
     fn highlight<'l>(&self, line: &'l str, pos: usize) -> Cow<'l, str> {
