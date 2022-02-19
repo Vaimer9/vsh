@@ -31,6 +31,7 @@ pub struct PromptEffects {
     pub ctx: Config,
 }
 
+// For tab completion, not fully customizable yet
 impl Completer for PromptEffects {
     type Candidate = Pair;
 
@@ -44,6 +45,7 @@ impl Completer for PromptEffects {
     }
 }
 
+// Generating hints
 impl Hinter for PromptEffects {
     type Hint = String;
 
@@ -52,6 +54,7 @@ impl Hinter for PromptEffects {
     }
 }
 
+// Showing and displaying hints
 impl Highlighter for PromptEffects {
     fn highlight_prompt<'b, 's: 'b, 'p: 'b>(
         &'s self,
@@ -111,6 +114,7 @@ impl Highlighter for PromptEffects {
     }
 }
 
+// Bracket validation
 impl Validator for PromptEffects {
     fn validate(
         &self,

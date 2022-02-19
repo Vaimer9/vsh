@@ -29,12 +29,12 @@ use rustyline::hint::HistoryHinter;
 use rustyline::validate::MatchingBracketValidator;
 use rustyline::{CompletionType, Config, EditMode, Editor};
 
+#[cfg(not(feature = "extended-siginfo"))]
+use signal_hook::iterator::Signals;
+
 #[cfg(feature = "extended-siginfo")]
 type Signals =
     signal_hook::iterator::SignalsInfo<signal_hook::iterator::exfiltrator::origin::WithOrigin>;
-
-#[cfg(not(feature = "extended-siginfo"))]
-use signal_hook::iterator::Signals;
 
 pub struct Repl;
 
