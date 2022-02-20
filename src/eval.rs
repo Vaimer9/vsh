@@ -9,10 +9,10 @@ use crate::command::Builtin;
 use crate::utils::expand;
 
 use std::collections::HashMap;
-use std::process::Command;
+use std::process::{Command, Stdio, Child};
 use std::string::ToString;
 
-pub struct Internalcommand {
+pub struct Vshcommand {
     keyword: String,
     args: Vec<String>,
 }
@@ -24,7 +24,7 @@ pub enum CommandError {
     Terminated(i32), // If the program was terminated by the user
 }
 
-impl Internalcommand {
+impl Vshcommand {
     pub fn new(input: String) -> Self {
         let mut splitted = input.trim().split_whitespace();
         let keyword = match splitted.next() {
@@ -38,52 +38,84 @@ impl Internalcommand {
         }
     }
 
-    pub fn eval(&mut self, aliases: &HashMap<&str, &str>) -> Result<(), CommandError> {
-        match (self.keyword.as_str(), self.args.clone()) {
-            ("cd", args) => builtins::cd::Cd::run(args),
+    pub fn eval(raw: String, aliases: &HashMap<&str, &str>) -> Result<(), CommandError> {
+        
+        let mut commands = raw.split('|').peekable();
+        let mut prev = None;
+        let mut status = Ok(());
 
-            ("", _) => Ok(()),
+        while let Some(command) = commands.next() {
+            let vshcmd = Self::new(command.to_string());
 
-            ("exit", _) => Err(CommandError::Exit),
 
-            (x, y) => match *x.as_bytes().last().unwrap() as char {
-                '/' => builtins::cd::Cd::run(vec![x.to_string()]),
-                _ => {
-                    let args = y.into_iter().map(expand).collect::<Vec<_>>();
-                    if let Some(alias) = &aliases.get(x) {
-                        let mut new_x = alias.to_string();
+            status = match (vshcmd.keyword.as_str(), vshcmd.args.clone()) {
+                ("cd", args) => builtins::cd::Cd::run(args),
 
-                        for flag in &args {
-                            new_x.push_str(&format!(" {}", flag));
+                ("", _) => Ok(()),
+
+                ("exit", _) => Err(CommandError::Exit),
+
+                (x, y) => match *x.as_bytes().last().unwrap() as char {
+                    '/' => builtins::cd::Cd::run(vec![x.to_string()]),
+                    _ => {
+
+                        let stdin = prev.cloned().map_or(
+                            Stdio::inherit(),
+                            |output: Child| Stdio::from(output.stdout.unwrap())
+                        );
+
+                        let stdout = if commands.peek().is_some() {
+                            Stdio::piped()
+                        } else {
+                            Stdio::inherit()
+                        };
+
+                        let args = y.into_iter().map(expand).collect::<Vec<_>>();
+                        if let Some(alias) = &aliases.get(x) {
+                            let mut new_x = alias.to_string();
+
+                            for flag in &args {
+                                new_x.push_str(&format!(" {}", flag));
+                            }
+
+                            return Self::run(new_x, aliases);
                         }
+                        return match Command::new(&x)
+                            .args(args)
+                            .stdout(stdout)
+                            .stdin(stdin)
+                            .spawn() 
+                        {
+                            Ok(mut ok) => {
+                                prev = Some(ok);
 
-                        return Self::run(new_x, aliases);
-                    }
-
-                    match Command::new(&x).args(args).spawn() {
-                        Ok(mut ok) => {
-                            if let Ok(status) = ok.wait() {
-                                match status.code() {
-                                    Some(code) => {
-                                        if code > 0 {
-                                            Err(CommandError::Finished(code))
-                                        } else {
-                                            Ok(())
+                                if let Ok(status) = ok.wait() {
+                                    match status.code() {
+                                        Some(code) => {
+                                            if code > 0 {
+                                                Err(CommandError::Finished(code))
+                                            } else {
+                                                Ok(())
+                                            }
                                         }
+                                        None => Err(CommandError::Terminated(127)),
                                     }
-                                    None => Err(CommandError::Terminated(127)),
+                                } else {
+                                    Err(CommandError::Error(
+                                        "Command could not be executed".to_string(),
+                                    ))
                                 }
-                            } else {
-                                Err(CommandError::Error(
-                                    "Command could not be executed".to_string(),
-                                ))
+                            }
+                            Err(_) => {
+                                prev = None;
+                                Err(CommandError::Error(format!("No such command as `{}`", x)))
                             }
                         }
-                        Err(_) => Err(CommandError::Error(format!("No such command as `{}`", x))),
                     }
-                }
-            },
+                },
+            };
         }
+        status
     }
 
     pub fn run(x: String, y: &HashMap<&str, &str>) -> Result<(), CommandError> {
@@ -94,8 +126,8 @@ impl Internalcommand {
         last_return
     }
 
-    fn run_command(com: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
-        Internalcommand::new(com).eval(x)
+    fn run_command(raw: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
+        Self::eval(raw, x)
     }
 
     fn run_linked_commands(commands: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {

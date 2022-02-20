@@ -12,7 +12,7 @@ use std::io;
 use std::process;
 use std::thread;
 
-use crate::eval::{CommandError, Internalcommand};
+use crate::eval::{CommandError, Vshcommand};
 use crate::highlight::PromptEffects;
 use crate::prompt::{Prompt, PromptInfo};
 use crate::utils::{fetch_data, get_alias, get_toml};
@@ -111,7 +111,7 @@ impl Repl {
                 Ok(x) => {
                     rl.add_history_entry(x.as_str());
 
-                    if let Err(e) = Internalcommand::run(x, &aliases) {
+                    if let Err(e) = Vshcommand::run(x, &aliases) {
                         match e {
                             CommandError::Exit => {
                                 if rl
