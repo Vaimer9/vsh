@@ -7,6 +7,7 @@
 mod builtins;
 mod command;
 mod eval;
+mod git;
 mod highlight;
 mod prompt;
 mod repl;
