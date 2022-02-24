@@ -107,9 +107,11 @@ impl Prompt {
         let current_branch = git.get_current_branch_info();
         let current_branch_name = if let Ok(branch) = current_branch {
             format!(
-                "({} {}*)",
+                "({} {}* {}+ {}-)",
                 branch.get_name().truecolor(255, 255, 0),
-                branch.get_files_changed().to_string().truecolor(0, 255, 0)
+                branch.get_files_changed().to_string().truecolor(255, 127, 0),
+                branch.get_loc_addition().to_string().truecolor(0, 255, 0),
+                branch.get_loc_deletion().to_string().truecolor(255, 0, 0),
             )
         } else {
             format!("")

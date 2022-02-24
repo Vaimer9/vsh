@@ -5,7 +5,7 @@
 */
 use std::path::Path;
 
-use git2::{Branch, Repository};
+use git2::Repository;
 use std::env;
 
 pub struct Git {
@@ -15,13 +15,22 @@ pub struct Git {
 pub struct BranchInfo {
     name: String,
     files_changed: usize,
+    loc_addition: usize,
+    loc_deletion: usize,
 }
 
 impl BranchInfo {
-    pub fn new(name: String, files_changed: usize) -> Self {
+    pub fn new(
+        name: String,
+        files_changed: usize,
+        loc_addition: usize,
+        loc_deletion: usize,
+    ) -> Self {
         Self {
             name,
             files_changed,
+            loc_addition,
+            loc_deletion,
         }
     }
 
@@ -33,6 +42,16 @@ impl BranchInfo {
     /// Get the branch info's files changed.
     pub fn get_files_changed(&self) -> usize {
         self.files_changed
+    }
+
+    /// Get the branch info's loc addition.
+    pub fn get_loc_addition(&self) -> usize {
+        self.loc_addition
+    }
+
+    /// Get the branch info's loc deletion.
+    pub fn get_loc_deletion(&self) -> usize {
+        self.loc_deletion
     }
 }
 
@@ -83,6 +102,8 @@ impl Git {
                     return Ok(BranchInfo::new(
                         branch.0.name().unwrap().unwrap().to_string(),
                         stats.files_changed(),
+                        stats.insertions(),
+                        stats.deletions(),
                     ));
                 }
             }
