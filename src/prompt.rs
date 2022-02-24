@@ -6,7 +6,7 @@
 
 use colored::*;
 
-use crate::{git::Git, utils::Config};
+use crate::{utils::Git, utils::Config};
 
 // This struct is to know what prompt appearance was at STARTUP
 pub enum Prompt {

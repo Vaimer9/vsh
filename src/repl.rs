@@ -13,9 +13,8 @@ use std::process;
 use std::thread;
 
 use crate::eval::{CommandError, Internalcommand};
-use crate::highlight::PromptEffects;
 use crate::prompt::{Prompt, PromptInfo};
-use crate::utils::{fetch_data, get_alias, get_toml};
+use crate::utils::{fetch_data, get_alias, get_toml, PromptEffects};
 
 use libc::c_int;
 use signal_hook::consts::signal::*;
