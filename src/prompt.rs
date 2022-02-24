@@ -112,7 +112,7 @@ impl Prompt {
             } => {
                 let backarrow = "".truecolor(color.0, color.1, color.2);
                 let forwardarrow = "".truecolor(color.0, color.1, color.2);
-                let directory = format!("   {} ", current_dir)
+                let directory = format!("   {current_dir} ")
                     .on_truecolor(color.0, color.1, color.2)
                     .truecolor(text_color.0, text_color.1, text_color.2)
                     .bold();
@@ -175,7 +175,6 @@ impl Prompt {
                 let pretty_cwd = if current_dir == "/" {
                     "/".bold().truecolor(36, 55, 224)
                 } else {
-                    // Unwrap free, insured in the first if statement
                     current_dir
                         .split('/')
                         .collect::<Vec<&str>>()

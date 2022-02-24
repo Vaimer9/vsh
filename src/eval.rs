@@ -38,84 +38,66 @@ impl Vshcommand {
         }
     }
 
-    pub fn eval(raw: String, aliases: &HashMap<&str, &str>) -> Result<(), CommandError> {
-        
-        let mut commands = raw.split('|').peekable();
-        let mut prev = None;
-        let mut status = Ok(());
+    pub fn eval(raw: String, aliases: HashMap<&str, &str> ) -> Result<(), CommandError> {
+        let mut rt = Ok(());
+        let mut previous = None;
+        let commands = raw.split('|').peekable();
 
-        while let Some(command) = commands.next() {
-            let vshcmd = Self::new(command.to_string());
-
-
-            status = match (vshcmd.keyword.as_str(), vshcmd.args.clone()) {
+        while let Some(command) = commands.next() { // Linked list flashbacks
+            let vshcommand = Self::new(command.to_string());
+            
+            match (vshcmd.keyword.as_str(), vshcmd.args.clone()) {
                 ("cd", args) => builtins::cd::Cd::run(args),
 
                 ("", _) => Ok(()),
 
                 ("exit", _) => Err(CommandError::Exit),
 
-                (x, y) => match *x.as_bytes().last().unwrap() as char {
-                    '/' => builtins::cd::Cd::run(vec![x.to_string()]),
-                    _ => {
-
-                        let stdin = prev.cloned().map_or(
-                            Stdio::inherit(),
-                            |output: Child| Stdio::from(output.stdout.unwrap())
-                        );
-
-                        let stdout = if commands.peek().is_some() {
-                            Stdio::piped()
-                        } else {
-                            Stdio::inherit()
-                        };
-
-                        let args = y.into_iter().map(expand).collect::<Vec<_>>();
-                        if let Some(alias) = &aliases.get(x) {
-                            let mut new_x = alias.to_string();
-
-                            for flag in &args {
-                                new_x.push_str(&format!(" {}", flag));
-                            }
-
-                            return Self::run(new_x, aliases);
-                        }
-                        return match Command::new(&x)
-                            .args(args)
-                            .stdout(stdout)
-                            .stdin(stdin)
-                            .spawn() 
-                        {
-                            Ok(mut ok) => {
-                                prev = Some(ok);
-
-                                if let Ok(status) = ok.wait() {
-                                    match status.code() {
-                                        Some(code) => {
-                                            if code > 0 {
-                                                Err(CommandError::Finished(code))
-                                            } else {
-                                                Ok(())
-                                            }
-                                        }
-                                        None => Err(CommandError::Terminated(127)),
-                                    }
-                                } else {
-                                    Err(CommandError::Error(
-                                        "Command could not be executed".to_string(),
-                                    ))
-                                }
-                            }
-                            Err(_) => {
-                                prev = None;
-                                Err(CommandError::Error(format!("No such command as `{}`", x)))
-                            }
-                        }
+                (x, y) => {
+                    if '|' == *x.as_bytes().last().unwrap() as char {
+                        return builtins::cd::Cd::run(args);
                     }
-                },
-            };
+
+                    let args = y.into_iter().map(expand).collect::<Vec<_>>();
+                    
+                    /// Look for alias in keyword
+                    /// if found then run command again with keyword replaced with the alias
+                    if let Some(alias) = &alias.get(x) {
+                        let mut new_x = alias.to_string();
+
+                        /// Add the arguments passed in as well
+                        for flags in &args {
+                            new_x.push_str(&format!(" {}", flag));
+                        }
+
+                        Self::run(new_x, aliases);
+                    }
+                    
+                    /// Set up Stdin and Stdout
+                    let stdin = prev.map_or(
+                        Stdio::inherit(),
+                        |output: Child| Stdio::from(output.stdout.unwrap())
+                    );
+
+                    let stdout = if commands.peek().is_some() {
+                        Stdio::piped()
+                    } else {
+                        Stdio::inherit()
+                    };
+
+                    /// Execute the command and store its info as a Child
+                    let child = Self::exec(&x, args, stdin, stdout)?;
+                    let status = get_status(&child)?;
+
+                    prev = Some(child)
+                    return status
+                }
+            }
         }
-        status
+
+        if let Some(mut final_command) = previous_command {
+            final_command.get_status()?;
+        }
     }
 
     pub fn run(x: String, y: &HashMap<&str, &str>) -> Result<(), CommandError> {
@@ -126,16 +108,46 @@ impl Vshcommand {
         last_return
     }
 
-    fn run_command(raw: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
+    fn call_eval(raw: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
         Self::eval(raw, x)
     }
 
     fn run_linked_commands(commands: String, x: &HashMap<&str, &str>) -> Result<(), CommandError> {
         for linked_com in commands.split("&&") {
-            if let Err(e) = Self::run_command(linked_com.to_string(), x) {
+            if let Err(e) = Self::call_eval(linked_com.to_string(), x) {
                 return Err(e);
             }
         }
         Ok(())
+    }
+
+    fn exec(keyword: String, args: Vec<String>, stdout: Stdio, stdin: Stdin) -> Result<Child, CommandError> {
+        match Command::new(keyword)
+            .args(args)
+            .stdin(stdin)
+            .stdout(stdout)
+            .spawn()
+        {
+            Ok(ok) => ok,
+            Err(_) => Err(CommandError::Error(format!("No such command as `{}`", x)))
+        }
+    }
+
+    fn get_status(child: &Child) -> Result<i32, CommandError> {
+        match ok.wait() {
+            Ok(status) => {
+                match status.code() {
+                    Some(code) => {
+                        if code > 0 {
+                            Err(CommandError::Finished(code))
+                        } else {
+                            Ok(())
+                        }
+                    }
+                    None => Err(CommandError::Terminated(127))
+                }
+            }
+            Err(_) => Err(CommandError::Error("Command could not be executed".to_string()))
+        }
     }
 }
