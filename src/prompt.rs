@@ -6,7 +6,7 @@
 
 use colored::*;
 
-use crate::utils::Config;
+use crate::{utils::Git, utils::Config};
 
 // This struct is to know what prompt appearance was at STARTUP
 pub enum Prompt {
@@ -103,6 +103,20 @@ impl Prompt {
             current_path.replace(&home, "~")
         };
 
+        let git: Git = Git::from_current_dir();
+        let current_branch = git.get_current_branch_info();
+        let current_branch_name = if let Ok(branch) = current_branch {
+            format!(
+                "({} {}* {}+ {}-)",
+                branch.get_name().truecolor(255, 255, 0),
+                branch.get_files_changed().to_string().truecolor(255, 127, 0),
+                branch.get_loc_addition().to_string().truecolor(0, 255, 0),
+                branch.get_loc_deletion().to_string().truecolor(255, 0, 0),
+            )
+        } else {
+            format!("")
+        };
+
         match self {
             Self::Modern {
                 promptchar,
@@ -137,9 +151,9 @@ impl Prompt {
                 };
 
                 if *double {
-                    format!("{backarrow}{cross}{code}{directory}{forwardarrow}\n{pr_char} ")
+                    format!("{backarrow}{cross}{code}{directory}{current_branch_name}{forwardarrow}\n{pr_char} ")
                 } else {
-                    format!("{code}{cross}{directory}{forwardarrow} ")
+                    format!("{code}{cross}{directory}{current_branch_name}{forwardarrow} ")
                 }
             }
 
@@ -158,14 +172,16 @@ impl Prompt {
 
                 if *double {
                     format!(
-                        "[{}]\n{} ",
+                        "[{}]{}\n{} ",
                         current_dir.truecolor(text_color.0, text_color.1, text_color.2),
+                        current_branch_name,
                         pr_char
                     )
                 } else {
                     format!(
-                        "[{}]{} ",
+                        "[{}]{}{} ",
                         current_dir.truecolor(text_color.0, text_color.1, text_color.2),
+                        current_branch_name,
                         pr_char
                     )
                 }
