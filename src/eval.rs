@@ -39,65 +39,45 @@ impl Vshcommand {
     }
 
     pub fn eval(raw: String, aliases: &HashMap<&str, &str> ) -> Result<(), CommandError> {
-        let mut previous = None;
-        let mut commands = raw.split('|').peekable();
-
-        while let Some(command) = commands.next() { // Linked list flashbacks
-            let vshcmd = Self::new(command.to_string());
+        let vshcmd = Self::new(raw);
             
-            return match (vshcmd.keyword.as_str(), vshcmd.args.clone()) {
-                ("cd", y) => builtins::cd::Cd::run(y),
+        match (vshcmd.keyword.as_str(), vshcmd.args.clone()) {
+            ("cd", y) => builtins::cd::Cd::run(y),
 
-                ("", _) => Ok(()),
+            ("", _) => Ok(()),
 
-                ("exit", _) => Err(CommandError::Exit),
+            ("exit", _) => Err(CommandError::Exit),
 
-                (x, y) => {
-                    if '|' == *x.as_bytes().last().unwrap() as char {
-                        return builtins::cd::Cd::run(y);
-                    }
-
-                    let args = y.into_iter().map(expand).collect::<Vec<_>>();
-                    
-                    /// Look for alias in keyword
-                    /// if found then run command again with keyword replaced with the alias
-                    if let Some(alias) = &aliases.get(x) {
-                        let mut new_x = alias.to_string();
-
-                        /// Add the arguments passed in as well
-                        for flags in &args {
-                            new_x.push_str(&format!(" {}", flags));
-                        }
-
-                        Self::run(new_x, aliases);
-                    }
-                    
-                    /// Set up Stdin and Stdout
-                    let stdin = previous.map_or(
-                        Stdio::inherit(),
-                        |output: Child| Stdio::from(output.stdout.unwrap())
-                    );
-
-                    let stdout = if commands.peek().is_some() {
-                        Stdio::piped()
-                    } else {
-                        Stdio::inherit()
-                    };
-
-                    /// Execute the command and store its info as a Child
-                    let mut child = Self::exec(x.to_string(), args, stdin, stdout)?;
-
-                    // previous = Some(child);
-                    return Self::get_status(&mut child);
+            (x, y) => {
+                if '|' == *x.as_bytes().last().unwrap() as char {
+                    return builtins::cd::Cd::run(y);
                 }
+
+                let args = y.into_iter().map(expand).collect::<Vec<_>>();
+                
+                /// Look for alias in keyword
+                /// if found then run command again with keyword replaced with the alias
+                if let Some(alias) = &aliases.get(x) {
+                    let mut new_x = alias.to_string();
+
+                    /// Add the arguments passed in as well
+                    for flags in &args {
+                        new_x.push_str(&format!(" {}", flags));
+                    }
+
+                    Self::run(new_x, aliases);
+                }
+                
+                let stdin = Stdio::inherit();
+                let stdout = Stdio::inherit();
+
+                /// Execute the command and store its info as a Child
+                let mut child = Self::exec(x.to_string(), args, stdin, stdout)?;
+
+                // previous = Some(child);
+                return Self::get_status(&mut child);
             }
         }
-
-        Ok(())
-
-        // if let Some(mut final_command) = previous {
-        //     get_status(final_command)?
-        // }
     }
 
     pub fn run(x: String, y: &HashMap<&str, &str>) -> Result<(), CommandError> {
@@ -122,14 +102,14 @@ impl Vshcommand {
     }
 
     fn exec(keyword: String, args: Vec<String>, stdout: Stdio, stdin: Stdio) -> Result<Child, CommandError> {
-        match Command::new(keyword)
+        match Command::new(&keyword)
             .args(args)
             .stdin(stdin)
             .stdout(stdout)
             .spawn()
         {
             Ok(ok) => Ok(ok),
-            Err(x) => Err(CommandError::Error(format!("No such command as `{}`", x)))
+            Err(_) => Err(CommandError::Error(format!("No such command as `{keyword}`")))
         }
     }
 
