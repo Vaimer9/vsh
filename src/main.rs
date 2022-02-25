@@ -10,6 +10,7 @@ mod eval;
 mod highlight;
 mod prompt;
 mod repl;
+mod theme;
 mod utils;
 
 use repl::Repl;
