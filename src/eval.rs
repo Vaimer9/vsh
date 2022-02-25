@@ -38,16 +38,15 @@ impl Vshcommand {
         }
     }
 
-    pub fn eval(raw: String, aliases: HashMap<&str, &str> ) -> Result<(), CommandError> {
-        let mut rt = Ok(());
+    pub fn eval(raw: String, aliases: &HashMap<&str, &str> ) -> Result<(), CommandError> {
         let mut previous = None;
-        let commands = raw.split('|').peekable();
+        let mut commands = raw.split('|').peekable();
 
         while let Some(command) = commands.next() { // Linked list flashbacks
-            let vshcommand = Self::new(command.to_string());
+            let vshcmd = Self::new(command.to_string());
             
-            match (vshcmd.keyword.as_str(), vshcmd.args.clone()) {
-                ("cd", args) => builtins::cd::Cd::run(args),
+            return match (vshcmd.keyword.as_str(), vshcmd.args.clone()) {
+                ("cd", y) => builtins::cd::Cd::run(y),
 
                 ("", _) => Ok(()),
 
@@ -55,26 +54,26 @@ impl Vshcommand {
 
                 (x, y) => {
                     if '|' == *x.as_bytes().last().unwrap() as char {
-                        return builtins::cd::Cd::run(args);
+                        return builtins::cd::Cd::run(y);
                     }
 
                     let args = y.into_iter().map(expand).collect::<Vec<_>>();
                     
                     /// Look for alias in keyword
                     /// if found then run command again with keyword replaced with the alias
-                    if let Some(alias) = &alias.get(x) {
+                    if let Some(alias) = &aliases.get(x) {
                         let mut new_x = alias.to_string();
 
                         /// Add the arguments passed in as well
                         for flags in &args {
-                            new_x.push_str(&format!(" {}", flag));
+                            new_x.push_str(&format!(" {}", flags));
                         }
 
                         Self::run(new_x, aliases);
                     }
                     
                     /// Set up Stdin and Stdout
-                    let stdin = prev.map_or(
+                    let stdin = previous.map_or(
                         Stdio::inherit(),
                         |output: Child| Stdio::from(output.stdout.unwrap())
                     );
@@ -86,18 +85,19 @@ impl Vshcommand {
                     };
 
                     /// Execute the command and store its info as a Child
-                    let child = Self::exec(&x, args, stdin, stdout)?;
-                    let status = get_status(&child)?;
+                    let mut child = Self::exec(x.to_string(), args, stdin, stdout)?;
 
-                    prev = Some(child)
-                    return status
+                    // previous = Some(child);
+                    return Self::get_status(&mut child);
                 }
             }
         }
 
-        if let Some(mut final_command) = previous_command {
-            final_command.get_status()?;
-        }
+        Ok(())
+
+        // if let Some(mut final_command) = previous {
+        //     get_status(final_command)?
+        // }
     }
 
     pub fn run(x: String, y: &HashMap<&str, &str>) -> Result<(), CommandError> {
@@ -121,20 +121,20 @@ impl Vshcommand {
         Ok(())
     }
 
-    fn exec(keyword: String, args: Vec<String>, stdout: Stdio, stdin: Stdin) -> Result<Child, CommandError> {
+    fn exec(keyword: String, args: Vec<String>, stdout: Stdio, stdin: Stdio) -> Result<Child, CommandError> {
         match Command::new(keyword)
             .args(args)
             .stdin(stdin)
             .stdout(stdout)
             .spawn()
         {
-            Ok(ok) => ok,
-            Err(_) => Err(CommandError::Error(format!("No such command as `{}`", x)))
+            Ok(ok) => Ok(ok),
+            Err(x) => Err(CommandError::Error(format!("No such command as `{}`", x)))
         }
     }
 
-    fn get_status(child: &Child) -> Result<i32, CommandError> {
-        match ok.wait() {
+    fn get_status(child: &mut Child) -> Result<(), CommandError> {
+        match child.wait() {
             Ok(status) => {
                 match status.code() {
                     Some(code) => {
