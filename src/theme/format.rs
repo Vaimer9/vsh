@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use colored::Colorize;
 
-use super::parser::{Color, Node};
+use super::parser::{Color, Node, Theme};
 
 pub trait ThemeContext {
     fn get_var(&self, var_name: &str) -> &str;
@@ -30,10 +30,10 @@ impl Context {
     }
 }
 
-pub fn construct_colored<T: ThemeContext>(theme: Vec<Node>, context: T) -> String {
+pub fn construct_colored<T: ThemeContext>(theme: &Theme, context: T) -> String {
     let mut colored = String::from("");
     let mut current_color = Color::new(255, 255, 255);
-    for node in theme.iter() {
+    for node in theme.get_vec().iter() {
         match node {
             Node::Var(v) => {
                 let s = String::from(context.get_var(v.var_name));

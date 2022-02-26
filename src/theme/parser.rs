@@ -65,6 +65,15 @@ pub enum Node<'a> {
     Literal(LiteralToken<'a>),
 }
 
+#[derive(Clone)]
+pub struct Theme<'a>(Vec<Node<'a>>);
+
+impl<'a> Theme<'a> {
+    pub fn get_vec(&self) -> &Vec<Node<'a>> {
+        &self.0
+    }
+}
+
 impl<'a> Node<'a> {
     pub fn var(&self) -> Option<&VarToken<'a>> {
         match self {
@@ -136,7 +145,7 @@ pub fn parse_frag(s: Span) -> IResult<Span, Node> {
     Ok((s, n))
 }
 
-pub fn parse_theme(s: Span) -> IResult<Span, Vec<Node>> {
+pub fn parse_theme(s: Span) -> IResult<Span, Theme> {
     let (s, v) = many_till(parse_frag, eof)(s)?;
-    Ok((s, v.0))
+    Ok((s, Theme(v.0)))
 }
