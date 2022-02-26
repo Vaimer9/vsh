@@ -6,7 +6,7 @@
 
 use std::collections::HashMap;
 use std::env;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
@@ -71,7 +71,9 @@ pub struct EffectsCtx {
 
 pub fn fetch_data() -> String {
     let mut path = PathBuf::from(env::var("HOME").unwrap());
-    path.push(".vshrc.toml");
+    path.push(".config");
+    path.push("vsh");
+    path.push("config.toml");
 
     let mut data = String::new();
     if path.exists() {
@@ -86,6 +88,14 @@ pub fn fetch_data() -> String {
             }
         }
     } else {
+        {
+            path.pop();
+            let dir = &path;
+            if let Err(e) = fs::create_dir_all(dir) {
+                eprintln!("Could not create configuration directory\n{e}")
+            }
+            path.push("config.toml");
+        } // Have to do this manually as there is no create_file_all() function in std lib
         match File::create(&path) {
             Ok(mut x) => {
                 if x.write_all(BASE_CONFIG.as_bytes()).is_err() {
