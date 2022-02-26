@@ -4,9 +4,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #[cfg(test)]
-pub mod parser_test;
-#[cfg(test)]
 pub mod format_test;
+#[cfg(test)]
+pub mod parser_test;
 
+pub mod context;
 pub mod format;
 pub mod parser;

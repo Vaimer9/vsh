@@ -7,6 +7,7 @@
 mod parser_test {
     use colored::Colorize;
 
+    use crate::theme::context::*;
     use crate::theme::format::*;
     use crate::theme::parser::*;
 

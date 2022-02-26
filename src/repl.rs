@@ -15,6 +15,9 @@ use std::thread;
 use crate::eval::{CommandError, Internalcommand};
 use crate::highlight::PromptEffects;
 use crate::prompt::{Prompt, PromptInfo};
+use crate::theme::context::Context;
+use crate::theme::context::SessionContext;
+use crate::theme::context::ThemeContext;
 use crate::theme::parser::parse_theme;
 use crate::theme::parser::Span;
 use crate::utils::{fetch_data, get_alias, get_toml};
@@ -96,8 +99,13 @@ impl Repl {
         let theme = config_data.prompt.as_ref().unwrap().theme.as_ref().unwrap();
         let theme = parse_theme(Span::new(&theme)).unwrap().1;
 
+        let mut general_ctx = Context::new();
+        general_ctx.from_sub_context(&SessionContext::new());
+
         loop {
-            let prompt = Prompt::new(theme.clone()).generate_prompt(&promptinfo);
+            general_ctx.from_sub_context(&promptinfo);
+
+            let prompt = Prompt::new(theme.clone()).generate_prompt(&general_ctx);
 
             let helper = PromptEffects {
                 completer: FilenameCompleter::new(),
