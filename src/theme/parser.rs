@@ -1,6 +1,10 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_until, take_while1, take_while_m_n};
-
 use nom::combinator::{eof, map_res};
 use nom::multi::many_till;
 use nom::sequence::{delimited, tuple};
@@ -19,12 +23,6 @@ pub struct Color {
 impl Color {
     pub fn new(red: u8, green: u8, blue: u8) -> Self {
         Self { red, green, blue }
-    }
-
-    pub fn set(&mut self, red: u8, green: u8, blue: u8) {
-        self.red = red;
-        self.green = green;
-        self.blue = blue;
     }
 }
 
