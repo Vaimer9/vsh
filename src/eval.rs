@@ -9,7 +9,7 @@ use crate::command::Builtin;
 use crate::utils::expand;
 
 use std::collections::HashMap;
-use std::process::{Command, Stdio, Child};
+use std::process::{Child, Command, Stdio};
 use std::string::ToString;
 
 pub struct Vshcommand {
@@ -38,9 +38,9 @@ impl Vshcommand {
         }
     }
 
-    pub fn eval(raw: String, aliases: &HashMap<&str, &str> ) -> Result<(), CommandError> {
+    pub fn eval(raw: String, aliases: &HashMap<&str, &str>) -> Result<(), CommandError> {
         let vshcmd = Self::new(raw);
-            
+
         match (vshcmd.keyword.as_str(), vshcmd.args.clone()) {
             ("cd", y) => builtins::cd::Cd::run(y),
 
@@ -54,7 +54,7 @@ impl Vshcommand {
                 }
 
                 let args = y.into_iter().map(expand).collect::<Vec<_>>();
-                
+
                 // Look for alias in keyword
                 // if found then run command again with keyword replaced with the alias
                 if let Some(alias) = &aliases.get(x) {
@@ -65,17 +65,15 @@ impl Vshcommand {
                         new_x.push_str(&format!(" {}", flags));
                     }
 
-                    Self::run(new_x, aliases);
+                    Self::run(new_x, aliases)?;
                 }
-                
+
                 let stdin = Stdio::inherit();
                 let stdout = Stdio::inherit();
 
                 // Execute the command and store its info as a Child
                 let mut child = Self::exec(x.to_string(), args, stdin, stdout)?;
-
-                // previous = Some(child);
-                return Self::get_status(&mut child);
+                Self::get_status(&mut child)
             }
         }
     }
@@ -101,7 +99,12 @@ impl Vshcommand {
         Ok(())
     }
 
-    fn exec(keyword: String, args: Vec<String>, stdout: Stdio, stdin: Stdio) -> Result<Child, CommandError> {
+    fn exec(
+        keyword: String,
+        args: Vec<String>,
+        stdout: Stdio,
+        stdin: Stdio,
+    ) -> Result<Child, CommandError> {
         match Command::new(&keyword)
             .args(args)
             .stdin(stdin)
@@ -109,25 +112,27 @@ impl Vshcommand {
             .spawn()
         {
             Ok(ok) => Ok(ok),
-            Err(_) => Err(CommandError::Error(format!("No such command as `{keyword}`")))
+            Err(_) => Err(CommandError::Error(format!(
+                "No such command as `{keyword}`"
+            ))),
         }
     }
 
     fn get_status(child: &mut Child) -> Result<(), CommandError> {
         match child.wait() {
-            Ok(status) => {
-                match status.code() {
-                    Some(code) => {
-                        if code > 0 {
-                            Err(CommandError::Finished(code))
-                        } else {
-                            Ok(())
-                        }
+            Ok(status) => match status.code() {
+                Some(code) => {
+                    if code > 0 {
+                        Err(CommandError::Finished(code))
+                    } else {
+                        Ok(())
                     }
-                    None => Err(CommandError::Terminated(127))
                 }
-            }
-            Err(_) => Err(CommandError::Error("Command could not be executed".to_string()))
+                None => Err(CommandError::Terminated(127)),
+            },
+            Err(_) => Err(CommandError::Error(
+                "Command could not be executed".to_string(),
+            )),
         }
     }
 }
