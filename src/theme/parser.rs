@@ -16,6 +16,18 @@ pub struct Color {
     pub blue: u8,
 }
 
+impl Color {
+    pub fn new(red: u8, green: u8, blue: u8) -> Self {
+        Self { red, green, blue }
+    }
+
+    pub fn set(&mut self, red: u8, green: u8, blue: u8) {
+        self.red = red;
+        self.green = green;
+        self.blue = blue;
+    }
+}
+
 fn from_hex(input: Span) -> Result<u8, std::num::ParseIntError> {
     u8::from_str_radix(&input, 16)
 }
