@@ -55,12 +55,12 @@ impl Vshcommand {
 
                 let args = y.into_iter().map(expand).collect::<Vec<_>>();
                 
-                /// Look for alias in keyword
-                /// if found then run command again with keyword replaced with the alias
+                // Look for alias in keyword
+                // if found then run command again with keyword replaced with the alias
                 if let Some(alias) = &aliases.get(x) {
                     let mut new_x = alias.to_string();
 
-                    /// Add the arguments passed in as well
+                    // Add the arguments passed in as well
                     for flags in &args {
                         new_x.push_str(&format!(" {}", flags));
                     }
@@ -71,7 +71,7 @@ impl Vshcommand {
                 let stdin = Stdio::inherit();
                 let stdout = Stdio::inherit();
 
-                /// Execute the command and store its info as a Child
+                // Execute the command and store its info as a Child
                 let mut child = Self::exec(x.to_string(), args, stdin, stdout)?;
 
                 // previous = Some(child);
