@@ -13,7 +13,7 @@ mod parser_test {
 
     #[test]
     fn construct_colored_test() {
-        let span = Span::new("&[#FF00FF]`hello world`&[#0000FF]{{my_var}}");
+        let span = Span::new("$[b]*[#FF0000]&[#FF00FF]`hello world`&[#0000FF]{{my_var}}");
         let r = parse_theme(span).unwrap();
         let mut ctx = Context::new();
         ctx.set_var("my_var", " from vsh");
@@ -25,8 +25,8 @@ mod parser_test {
             construct_colored(&r.1, ctx),
             format!(
                 "{}{}",
-                hello_world.truecolor(255, 0, 255),
-                vsh.truecolor(0, 0, 255)
+                hello_world.truecolor(255, 0, 255).on_truecolor(255, 0, 0).bold(),
+                vsh.truecolor(0, 0, 255).on_truecolor(255, 0, 0).bold()
             )
         );
     }

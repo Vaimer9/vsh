@@ -3,8 +3,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+use colored::Styles;
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_until, take_while1, take_while_m_n};
+use nom::character::complete::one_of;
 use nom::combinator::{eof, map_res};
 use nom::multi::many_till;
 use nom::sequence::{delimited, tuple};
@@ -45,6 +47,34 @@ pub struct ColorToken<'a> {
 }
 
 #[derive(PartialEq, Debug, Clone)]
+pub struct BackgroundColorToken<'a> {
+    pub end_pos: Span<'a>,
+    pub background_color: Option<Color>,
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct StyleToken<'a> {
+    pub end_pos: Span<'a>,
+    pub style: Styles,
+}
+
+/// Match against cbdurilhs
+pub fn char_to_style(ch: char) -> Styles {
+    match ch {
+        'c' => Styles::Clear,
+        'b' => Styles::Bold,
+        'd' => Styles::Dimmed,
+        'u' => Styles::Underline,
+        'r' => Styles::Reversed,
+        'i' => Styles::Italic,
+        'l' => Styles::Blink,
+        'h' => Styles::Hidden,
+        's' => Styles::Strikethrough,
+        _ => Styles::Clear,
+    }
+}
+
+#[derive(PartialEq, Debug, Clone)]
 pub struct VarToken<'a> {
     pub end_pos: Span<'a>,
     pub var_name: &'a str,
@@ -60,6 +90,8 @@ pub struct LiteralToken<'a> {
 pub enum Node<'a> {
     Var(VarToken<'a>),
     Color(ColorToken<'a>),
+    BackgroundColor(BackgroundColorToken<'a>),
+    Style(StyleToken<'a>),
     Literal(LiteralToken<'a>),
 }
 
@@ -88,6 +120,20 @@ impl<'a> Node<'a> {
         }
     }
 
+    pub fn background_color(&self) -> Option<&BackgroundColorToken<'a>> {
+        match self {
+            Node::BackgroundColor(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn style(&self) -> Option<&StyleToken<'a>> {
+        match self {
+            Node::Style(d) => Some(d),
+            _ => None,
+        }
+    }
+
     pub fn literal(&self) -> Option<&LiteralToken<'a>> {
         match self {
             Node::Literal(d) => Some(d),
@@ -107,6 +153,49 @@ pub fn parse_color(s: Span) -> IResult<Span, Node> {
         Node::Color(ColorToken {
             end_pos,
             color: Color { red, green, blue },
+        }),
+    ))
+}
+
+pub fn parse_background_color(s: Span) -> IResult<Span, Node> {
+    let (s, _) = tag("*[#")(s)?;
+    let (s, (red, green, blue)) = tuple((hex_primary, hex_primary, hex_primary))(s)?;
+    let (s, _) = tag("]")(s)?;
+    let (s, end_pos) = position(s)?;
+
+    Ok((
+        s,
+        Node::BackgroundColor(BackgroundColorToken {
+            end_pos,
+            background_color: Some(Color { red, green, blue }),
+        }),
+    ))
+}
+
+pub fn parse_no_bg_color(s: Span) -> IResult<Span, Node> {
+    let (s, _) = tag("*[]")(s)?;
+    let (s, end_pos) = position(s)?;
+
+    Ok((
+        s,
+        Node::BackgroundColor(BackgroundColorToken {
+            end_pos,
+            background_color: None,
+        }),
+    ))
+}
+
+pub fn parse_style(s: Span) -> IResult<Span, Node> {
+    let (s, _) = tag("$[")(s)?;
+    let (s, style_char) = one_of("cbdurilhs")(s)?;
+    let (s, _) = tag("]")(s)?;
+    let (s, end_pos) = position(s)?;
+
+    Ok((
+        s,
+        Node::Style(StyleToken {
+            end_pos,
+            style: char_to_style(style_char),
         }),
     ))
 }
@@ -140,7 +229,14 @@ pub fn parse_literal(s: Span) -> IResult<Span, Node> {
 }
 
 pub fn parse_frag(s: Span) -> IResult<Span, Node> {
-    let (s, n) = alt((parse_color, parse_var, parse_literal))(s)?;
+    let (s, n) = alt((
+        parse_color,
+        parse_var,
+        parse_literal,
+        parse_style,
+        parse_no_bg_color,
+        parse_background_color,
+    ))(s)?;
     Ok((s, n))
 }
 

@@ -6,6 +6,18 @@ A theme string must be double quoted and respect the following rules:
 
 - strings must be quoted with single quotation mark like this `` `hello world !` ``
 - to specify text color you must use this marker `&[hex_color]`, replace `hex_color` with the corresponding rgb encoded hex color. For example use `&[#FF00FF]` for magenta.
+- to specify background color you must use this marker `*[hex_color]`, replace `hex_color` with the corresponding rgb encoded hex color. For example use `*[#FF0000]` for red.
+- to remove background color (default) you must use `*[]`.
+- it is possible to apply style to text by using `$[char_code]` where char code is one of these:
+  - `c` for clear text (without any styles) : default
+  - `b` for bold : **bold**
+  - `d` for dimmed text
+  - `u` for underlined text : <ins>underlined</ins>
+  - `r` for reversed text
+  - `i` for italic text : _italic_
+  - `l` for blinking text
+  - `h` for hidden text
+  - `s` for strikethrough text ~~strike~~
 - for variables use the following syntax `{{my_var}}` where my_var is a variable provided by the terminal. See below for an exhaustive list.
 
 A theme is located on the vsh config file under the `[prompt]` section and on the `theme=` line

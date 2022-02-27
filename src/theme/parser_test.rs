@@ -5,6 +5,8 @@
  */
 #[cfg(test)]
 mod parser_test {
+    use colored::Styles;
+
     use crate::theme::parser::*;
 
     #[test]
@@ -20,6 +22,46 @@ mod parser_test {
             }
         );
         assert_eq!(r.1.color().unwrap().end_pos.location_offset(), 10);
+    }
+
+    #[test]
+    fn parse_background_color_test() {
+        let span = Span::new("*[#FF00FF]");
+        let r = parse_background_color(span).unwrap();
+        assert_eq!(
+            r.1.clone().background_color().unwrap().background_color,
+            Some(Color {
+                red: 255,
+                green: 0,
+                blue: 255
+            })
+        );
+        assert_eq!(
+            r.1.background_color().unwrap().end_pos.location_offset(),
+            10
+        );
+    }
+
+    #[test]
+    fn parse_no_bg_color_test() {
+        let span = Span::new("*[]");
+        let r = parse_no_bg_color(span).unwrap();
+        assert_eq!(
+            r.1.clone().background_color().unwrap().background_color,
+            None
+        );
+        assert_eq!(
+            r.1.background_color().unwrap().end_pos.location_offset(),
+            10
+        );
+    }
+
+    #[test]
+    fn parse_style_test() {
+        let span = Span::new("$[b]");
+        let r = parse_style(span).unwrap();
+        assert_eq!(r.1.clone().style().unwrap().style, Styles::Bold);
+        assert_eq!(r.1.style().unwrap().end_pos.location_offset(), 4);
     }
 
     #[test]
