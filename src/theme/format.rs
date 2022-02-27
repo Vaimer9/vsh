@@ -62,6 +62,7 @@ pub fn construct_colored<T: ThemeContext>(theme: &Theme, context: T) -> String {
             }
             Node::BackgroundColor(c) => current_background_color = c.background_color.clone(),
             Node::Style(s) => current_style = s.style,
+            Node::Newline => (),
         }
     }
 

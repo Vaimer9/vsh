@@ -93,6 +93,7 @@ pub enum Node<'a> {
     BackgroundColor(BackgroundColorToken<'a>),
     Style(StyleToken<'a>),
     Literal(LiteralToken<'a>),
+    Newline,
 }
 
 #[derive(Clone)]
@@ -226,6 +227,11 @@ pub fn parse_literal(s: Span) -> IResult<Span, Node> {
             literal: &literal,
         }),
     ))
+}
+
+pub fn parse_newline(s: Span) -> IResult<Span, Node> {
+    let (s, _) = alt((tag("\n"), tag("\r\n")))(s)?;
+    Ok((s, Node::Newline))
 }
 
 pub fn parse_frag(s: Span) -> IResult<Span, Node> {
