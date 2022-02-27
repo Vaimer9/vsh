@@ -6,7 +6,7 @@
 
 use std::collections::HashMap;
 
-use chrono::{DateTime, Datelike, Local, TimeZone, Timelike, Utc};
+use chrono::{DateTime, Datelike, Local, Timelike, Utc};
 
 pub trait ThemeContext {
     fn get_var(&self, var_name: &str) -> &str;
@@ -44,7 +44,7 @@ impl Context {
             data: HashMap::new(),
         }
     }
-
+    #[cfg(test)]
     pub fn set_var(&mut self, var_name: &str, value: &str) {
         self.data.insert(var_name.to_string(), value.to_string());
     }

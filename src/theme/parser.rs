@@ -72,6 +72,7 @@ impl<'a> Theme<'a> {
     }
 }
 
+#[cfg(test)]
 impl<'a> Node<'a> {
     pub fn var(&self) -> Option<&VarToken<'a>> {
         match self {
