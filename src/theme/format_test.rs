@@ -22,10 +22,13 @@ mod parser_test {
         let vsh = String::from(" from vsh");
 
         assert_eq!(
-            construct_colored(&r.1, ctx),
+            construct_colored(&r.1, ctx).unwrap(),
             format!(
                 "{}{}",
-                hello_world.truecolor(255, 0, 255).on_truecolor(255, 0, 0).bold(),
+                hello_world
+                    .truecolor(255, 0, 255)
+                    .on_truecolor(255, 0, 0)
+                    .bold(),
                 vsh.truecolor(0, 0, 255).on_truecolor(255, 0, 0).bold()
             )
         );

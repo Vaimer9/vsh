@@ -22,6 +22,7 @@ use crate::theme::parser::parse_theme;
 use crate::theme::parser::Span;
 use crate::utils::{fetch_data, get_alias, get_toml};
 
+use colored::Colorize;
 use libc::c_int;
 use signal_hook::consts::signal::*;
 use signal_hook::low_level;
@@ -97,7 +98,23 @@ impl Repl {
         let aliases = get_alias(&config_data);
 
         let theme = config_data.prompt.as_ref().unwrap().theme.as_ref().unwrap();
-        let theme = parse_theme(Span::new(&theme)).unwrap().1;
+        let theme = match parse_theme(Span::new(&theme)) {
+            Ok(t) => t.1,
+            Err(error) => {
+                if let nom::Err::Error(x) = error {
+                    println!("{}{}", " ".repeat(x.input.get_column()), "↑".red());
+                    println!(
+                        "{}{}{}",
+                        " ".repeat(x.input.get_column()),
+                        "Parse error near: ".red(),
+                        x.input.fragment().bright_red().bold()
+                    );
+                }
+                parse_theme(Span::new("&[#7393B3]`[`{{current_dir}}`] `"))
+                    .unwrap()
+                    .1
+            }
+        };
 
         let mut general_ctx = Context::new();
         general_ctx.from_sub_context(&SessionContext::new());

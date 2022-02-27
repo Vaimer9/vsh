@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use chrono::{DateTime, Datelike, Local, Timelike, Utc};
 
 pub trait ThemeContext {
-    fn get_var(&self, var_name: &str) -> &str;
+    fn get_var(&self, var_name: &str) -> Option<&String>;
     fn from_sub_context<T: SubContext>(&mut self, contributor: &T);
     fn extend(&mut self, other: &Self);
 }
@@ -25,8 +25,8 @@ pub struct Context {
 }
 
 impl ThemeContext for Context {
-    fn get_var(&self, var_name: &str) -> &str {
-        self.data.get(var_name).unwrap()
+    fn get_var(&self, var_name: &str) -> Option<&String> {
+        self.data.get(var_name)
     }
 
     fn from_sub_context<T: SubContext>(&mut self, contributor: &T) {

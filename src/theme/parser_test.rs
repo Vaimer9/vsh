@@ -50,10 +50,7 @@ mod parser_test {
             r.1.clone().background_color().unwrap().background_color,
             None
         );
-        assert_eq!(
-            r.1.background_color().unwrap().end_pos.location_offset(),
-            10
-        );
+        assert_eq!(r.1.background_color().unwrap().end_pos.location_offset(), 3);
     }
 
     #[test]

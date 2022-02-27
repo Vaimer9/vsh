@@ -63,7 +63,13 @@ impl<'a> Prompt<'a> {
         ctx.from_sub_context(&chrono::offset::Local::now());
         ctx.extend(general_ctx);
 
-        construct_colored(&self.theme, ctx)
+        match construct_colored(&self.theme, ctx) {
+            Ok(x) => x,
+            Err(err) => {
+                println!("{}", err);
+                "> ".to_string()
+            }
+        }
     }
 }
 

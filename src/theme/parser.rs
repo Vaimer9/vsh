@@ -242,6 +242,7 @@ pub fn parse_frag(s: Span) -> IResult<Span, Node> {
         parse_style,
         parse_no_bg_color,
         parse_background_color,
+        parse_newline,
     ))(s)?;
     Ok((s, n))
 }
