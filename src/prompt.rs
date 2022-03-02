@@ -57,7 +57,6 @@ impl<'a> Prompt<'a> {
         };
         let dir_ctx = DirectoryContext::new(current_dir);
 
-
         let mut ctx = Context::new();
         ctx.from_sub_context(&dir_ctx);
         ctx.from_sub_context(&chrono::offset::Utc::now());

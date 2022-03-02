@@ -37,7 +37,6 @@ use rustyline::{CompletionType, Config, EditMode, Editor};
 #[cfg(not(feature = "extended-siginfo"))]
 use signal_hook::iterator::Signals;
 
-
 pub struct Repl;
 
 impl Repl {

@@ -4,11 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-
 mod highlight;
 mod utils;
 
-pub use {
-    highlight::*,
-    utils::*
-};
+pub use {highlight::*, utils::*};
