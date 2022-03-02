@@ -50,7 +50,7 @@ impl Vshcommand {
 
             (x, y) => {
                 if '|' == *x.as_bytes().last().unwrap() as char {
-                    return builtins::cd::Cd::run(y);
+                    return builtins::cd::Cd::run(vec![x.to_string()]);
                 }
 
                 let args = y.into_iter().map(expand).collect::<Vec<_>>();
