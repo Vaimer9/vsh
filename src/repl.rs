@@ -19,7 +19,7 @@ use crate::theme::context::SessionContext;
 use crate::theme::context::ThemeContext;
 use crate::theme::parser::parse_theme;
 use crate::theme::parser::Span;
-use crate::utils::{fetch_data, get_alias, get_toml, PromptEffects};
+use crate::utils::{fetch_data, get_alias, get_toml, get_theme, PromptEffects};
 
 use colored::Colorize;
 use libc::c_int;
@@ -91,14 +91,14 @@ impl Repl {
         };
 
         let aliases = get_alias(&config_data);
+        let theme = get_theme(&config_data);
 
-        let theme = config_data.prompt.as_ref().unwrap().theme.as_ref().unwrap();
         let theme = match parse_theme(Span::new(&theme)) {
             Ok(t) => t.1,
             Err(error) => {
                 if let nom::Err::Error(x) = error {
-                    println!("{}{}", " ".repeat(x.input.get_column()), "↑".red());
-                    println!(
+                    eprintln!("{}{}", " ".repeat(x.input.get_column()), "↑".red());
+                    eprintln!(
                         "{}{}{}",
                         " ".repeat(x.input.get_column()),
                         "Parse error near: ".red(),

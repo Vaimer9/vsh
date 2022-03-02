@@ -13,6 +13,8 @@ use std::path::PathBuf;
 use lazy_static::lazy_static;
 use serde_derive::Deserialize;
 
+const BASE_PROMPT: &str = "`$ `";
+
 const BASE_CONFIG: &str = r#"
 [prompt]
 theme="&[#7393B3]`[`{{current_dir}}`] `"
@@ -118,6 +120,18 @@ pub fn get_alias(data: &Config) -> HashMap<&str, &str> {
         }
     }
     list
+}
+
+pub fn get_theme(data: &Config) -> String {
+    match &data.prompt {
+        Some(prompt) => {
+            match &prompt.theme {
+                Some(x) => x.to_string(),
+                None => String::from(BASE_PROMPT)
+            }
+        }
+        None => String::from(BASE_PROMPT)
+    }
 }
 
 pub fn expand(raw: String) -> String {
