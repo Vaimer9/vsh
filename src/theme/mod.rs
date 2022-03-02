@@ -3,17 +3,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#[cfg(test)]
+pub mod format_test;
+#[cfg(test)]
+pub mod parser_test;
 
-mod builtins;
-mod command;
-mod eval;
-mod prompt;
-mod repl;
-mod theme;
-mod utils;
-
-use repl::Repl;
-
-fn main() {
-    Repl::new().start_shell().unwrap();
-}
+pub mod context;
+pub mod format;
+pub mod parser;
