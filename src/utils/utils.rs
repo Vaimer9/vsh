@@ -15,11 +15,7 @@ use serde_derive::Deserialize;
 
 const BASE_CONFIG: &str = r#"
 [prompt]
-double = false
-color = [115, 147, 179]
-text_color = [33, 33, 33]
-promptchar = "λ"
-style = "classic"
+theme="&[#7393B3]`[`{{current_dir}}`] `"
 
 [misc]
 alias = [
@@ -52,11 +48,7 @@ pub struct Misc {
 
 #[derive(Deserialize, Clone)]
 pub struct PromptConfig {
-    pub style: Option<String>,
-    pub promptchar: Option<String>,
-    pub color: Option<[u8; 3]>,
-    pub text_color: Option<[u8; 3]>,
-    pub double: Option<bool>,
+    pub theme: Option<String>,
 }
 
 #[derive(Deserialize, Clone)]

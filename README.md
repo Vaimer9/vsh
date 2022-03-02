@@ -1,6 +1,7 @@
 <div align="center">
 
 # vsh
+
 A blazingly fast shell made in Rust 🦀
 
 </div>
@@ -12,6 +13,7 @@ This is a shell made for the sophisticated power user. Far from finished yet but
 #### 1. Install via wget
 
 Install via running the following commands
+
 ```
 sudo wget https://github.com/vaimer9/vsh/releases/latest/download/vsh -q -P /bin
 sudo chmod +x /bin/vsh
@@ -27,16 +29,14 @@ sudo chmod +x /bin/vsh
 vsh will be installed in `/bin` directory, you can change this via changing line #11 in `Makefile` on your machine
 
 ## Customization
+
 Once you run vsh for the first time it automatically creates `.vshrc.toml`.
 All the customization possible is written there.
 Even then here is the text
+
 ```toml
 [prompt]
-double = false
-color = [115, 147, 179]
-text_color = [33, 33, 33]
-promptchar = "λ"
-style = "classic"
+theme="&[#7393B3]`[`{{current_dir}}`] `"
 
 [misc]
 alias = [
@@ -44,26 +44,25 @@ alias = [
 ]
 
 [effects]
-underlined = false 
+underlined = false
 bold = true
 dimmed = false
 suggestion_color = "red"
 
-truecolors = false 
+truecolors = false
 true_suggestion_color = [255, 0, 0]
 ```
 
-
 ### Example Config file
+
 This is the config file personally used by me:
+
 ```toml
 [prompt]
-style = "Modern"
-color = [33, 33, 33]
-text_color = [115, 147, 179]
-double = false
+theme="&[#7393B3]`[`{{current_dir}}`] `"
 ```
-As you can see customizing is not that hard and doesn't require too much code. I will be adding more and more into the level of customization possible!
+
+As you can see customizing is not that hard and doesn't require too much code. I will be adding more and more into the level of customization possible! See [this documentation for more infos on themes](https://github.com/Vaimer9/vsh/blob/main/docs/THEME.md)
 
 ## Roadmap
 
@@ -84,6 +83,7 @@ As you can see customizing is not that hard and doesn't require too much code. I
 - [ ] Plugin Support (Yikes!)
 
 See [projects](https://github.com/xmantle/vsh/projects/1) for more
+
 ## License
 
 Licensed under a Mozilla Public License.
