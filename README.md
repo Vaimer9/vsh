@@ -6,7 +6,7 @@ A blazingly fast shell made in Rust 🦀
 
 </div>
 
-This is a shell made for the sophisticated power user. Far from finished yet, but the main motive is to create a hyperextensible shell with all the features of previous generations added with tools geared towards improving your workflow.
+This is a shell made for the sophisticated power user. It's far from finished yet, but the main motive is to create a hyperextensible shell with all the features of previous generations added with tools geared towards improving your workflow.
 
 ## Installation
 
