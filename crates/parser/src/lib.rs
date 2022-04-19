@@ -1,4 +1,4 @@
-use chumsky::{prelude::*, text::whitespace};
+use chumsky::prelude::*;
 
 #[derive(Debug)]
 pub enum Tokens {
@@ -20,6 +20,7 @@ pub fn parser() -> impl Parser<char, Tokens, Error = Simple<char>> {
     let cmd = text::ident()
         .repeated()
         .at_least(1)
+        .padded_by(just(';'))
         .map(|idents| idents.join(" "))
         .map(Tokens::Command);
 
