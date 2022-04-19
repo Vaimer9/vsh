@@ -1,3 +1,4 @@
 /src/builtins/ls.rs
 /target
+/crates/*/target
 notes.md
