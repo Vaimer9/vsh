@@ -12,8 +12,10 @@ mod repl;
 mod theme;
 mod utils;
 
-use repl::Repl;
+// use repl::Repl;
+use parser::*;
 
 fn main() {
-    Repl::new().start_shell().unwrap();
+    let src = std::fs::read_to_string(std::env::args().nth(1).unwrap()).unwrap();
+    println!("{:#?}", parse_from_string(src));
 }

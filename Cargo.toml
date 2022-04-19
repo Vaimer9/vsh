@@ -4,6 +4,9 @@ version = "0.1.16"
 edition = "2021"
 
 [dependencies]
+
+parser = { path = "./crates/parser" }
+
 fancy-regex = "0.7.1"
 lazy_static = "*"
 serde = "1.0.130"
